@@ -1,1 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🚐 RV Operaciones — Viaje 2026</title>
+<style>
+:root{
+  --navy:#1A2E4A;--teal:#0D7377;--gold:#F5A623;
+  --green:#2E7D32;--gl:#E8F5E9;
+  --red:#C62828;--rl:#FFEBEE;--rb:#EF9A9A;
+  --orange:#E65100;--ol:#FFF3E0;
+  --bg:#F0F2F5;--text:#1A2E4A;--muted:#6B7C8D;
+  --border:#E0E0E0;--r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px}
 
+.header{background:var(--navy);color:#fff;padding:16px 16px 12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:10px}
+.header h1{font-size:18px;font-weight:700;color:var(--gold);line-height:1.2}
+.header p{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
+.hbtns{display:flex;gap:6px;flex-shrink:0}
+.hbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:12px;padding:6px 10px;border-radius:20px;cursor:pointer;white-space:nowrap}
+.hbtn.red{background:rgba(198,40,40,.35);border-color:rgba(198,40,40,.4)}
+.pcnt{font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px;display:flex;justify-content:space-between}
+.pct{font-size:20px;font-weight:700;color:var(--gold)}
+.pbg{background:rgba(255,255,255,.15);border-radius:99px;height:6px;overflow:hidden}
+.pfill{background:var(--gold);height:6px;border-radius:99px;transition:width .3s;width:0%}
+.sync{font-size:11px;color:rgba(255,255,255,.45);text-align:center;margin-top:7px;min-height:13px}
+.sync.on{color:var(--gold)}.sync.ok{color:#81C784}.sync.err{color:#EF9A9A}
+
+/* PHASE TABS */
+.tabs{display:flex;gap:0;overflow-x:auto;background:var(--navy);padding:0 14px 12px;scrollbar-width:none;border-top:1px solid rgba(255,255,255,.1)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.tab:first-child{border-radius:8px 0 0 8px}
+.tab:last-child{border-radius:0 8px 8px 0}
+.tab+.tab{border-left:none}
+.tab.active{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+
+/* SECTIONS */
+.wrap{padding:12px 14px 0}
+.section{margin-bottom:12px}
+.sec-hdr{display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:var(--r) var(--r) 0 0;cursor:pointer;user-select:none}
+.sec-icon{font-size:18px}
+.sec-title{font-size:14px;font-weight:700;flex:1;line-height:1.2}
+.sec-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.25);white-space:nowrap}
+.chev{font-size:14px;transition:transform .2s}
+.section.collapsed .chev{transform:rotate(-90deg)}
+.sec-body{background:#fff;border-radius:0 0 var(--r) var(--r);overflow:hidden;border:1.5px solid var(--border);border-top:none}
+.section.collapsed .sec-body{display:none}
+
+/* ITEMS */
+.item{display:flex;align-items:flex-start;gap:11px;padding:13px 12px 13px 14px;border-bottom:1px solid var(--border)}
+.item:last-of-type{border-bottom:none}
+.item.done{background:var(--gl)}
+.chkbox{width:28px;height:28px;min-width:28px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:#fff;margin-top:1px}
+.item.done .chkbox{background:var(--green);border-color:var(--green)}
+.ck{color:#fff;font-size:15px;font-weight:800;display:none;line-height:1}
+.item.done .ck{display:block}
+.ibody{flex:1;cursor:pointer;min-width:0}
+.itext{font-size:17px;line-height:1.4;color:var(--text);font-weight:500;word-break:break-word}
+.item.done .itext{text-decoration:line-through;color:var(--muted)}
+.inote{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.warn-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--rl);color:var(--red);border:1px solid var(--rb);margin-top:4px;text-transform:uppercase}
+.item.done .warn-pill{display:none}
+.iacts{display:flex;flex-direction:column;gap:3px;flex-shrink:0;margin-top:1px}
+.abtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.abtn:active{opacity:.6;transform:scale(.9)}
+.add-row{padding:9px 12px;border-top:1px dashed var(--border);background:#fafafa;display:flex;justify-content:center}
+.add-ibtn{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;width:100%}
+
+/* WARNING BOX */
+.warn-box{margin:0 14px 12px;background:var(--rl);border:1.5px solid var(--rb);border-radius:var(--r);padding:14px 16px}
+.warn-box h3{font-size:14px;font-weight:700;color:var(--red);margin-bottom:8px}
+.warn-item{font-size:14px;color:var(--red);padding:5px 0;border-bottom:1px solid rgba(198,40,40,.15);line-height:1.4}
+.warn-item:last-child{border-bottom:none}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 18px 38px;width:100%;max-width:560px}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:14px}
+.mlabel{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;margin-top:12px;text-transform:uppercase;letter-spacing:.5px}
+.minp{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:17px;color:var(--text);outline:none;font-family:inherit}
+.minp:focus{border-color:var(--teal)}
+.ctog{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;user-select:none}
+.ctog.on{border-color:var(--red);background:var(--rl)}
+.tdot{width:44px;height:26px;border-radius:99px;background:var(--border);position:relative;transition:background .2s;flex-shrink:0}
+.tdot::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.ctog.on .tdot{background:var(--red)}
+.ctog.on .tdot::after{transform:translateX(18px)}
+.tlabel{font-size:15px;font-weight:500;flex:1}
+.mbtns{display:flex;gap:10px;margin-top:18px}
+.mcancel{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:13px;font-size:16px;font-weight:600;color:var(--muted);cursor:pointer}
+.msave{flex:2;background:var(--teal);border:none;border-radius:10px;padding:13px;font-size:16px;font-weight:700;color:#fff;cursor:pointer}
+
+.empty{text-align:center;padding:32px 16px;color:var(--muted)}
+.fab{position:fixed;bottom:22px;right:16px;width:50px;height:50px;background:var(--navy);color:#fff;border-radius:50%;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:200}
+
+/* SECTION COLORS */
+.c-pickup{background:linear-gradient(135deg,#1A2E4A,#2C4A6E);color:#fff}
+.c-setup{background:linear-gradient(135deg,#1B5E20,#2E7D32);color:#fff}
+.c-connect{background:linear-gradient(135deg,#1565C0,#1976D2);color:#fff}
+.c-arrive{background:linear-gradient(135deg,#00695C,#00897B);color:#fff}
+.c-during{background:linear-gradient(135deg,#4A148C,#6A1B9A);color:#fff}
+.c-dump{background:linear-gradient(135deg,#BF360C,#D84315);color:#fff}
+.c-depart{background:linear-gradient(135deg,#37474F,#546E7A);color:#fff}
+.c-drive{background:linear-gradient(135deg,#006064,#00838F);color:#fff}
+.c-return{background:linear-gradient(135deg,#880E4F,#AD1457);color:#fff}
+.c-emergency{background:linear-gradient(135deg,#B71C1C,#C62828);color:#fff}
+.c-custom{background:linear-gradient(135deg,#E65100,#F57C00);color:#fff}
+.c-new0{background:linear-gradient(135deg,#1A2E4A,#2C4A6E);color:#fff}
+.c-new1{background:linear-gradient(135deg,#1B5E20,#2E7D32);color:#fff}
+.c-new2{background:linear-gradient(135deg,#1565C0,#1976D2);color:#fff}
+.c-new3{background:linear-gradient(135deg,#4A148C,#6A1B9A);color:#fff}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🚐 RV Operaciones</h1>
+      <p>Checklist de vuelo · Viaje Jun 5–14, 2026</p>
+    </div>
+    <div class="hbtns">
+      <button class="hbtn red" onclick="resetPhase()">↺ Fase</button>
+      <button class="hbtn red" onclick="resetAll()">↺ Todo</button>
+    </div>
+  </div>
+  <div class="pcnt">
+    <span class="pct" id="pct">0%</span>
+    <span id="cnt">0 de 0</span>
+  </div>
+  <div class="pbg"><div class="pfill" id="pfill"></div></div>
+  <div class="sync" id="sync"></div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+<div id="main-wrap"></div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal" onclick="overlayClick(event)">
+  <div class="modal">
+    <h3 id="mtitle">✏️ Editar</h3>
+    <label class="mlabel">Texto</label>
+    <input type="text" class="minp" id="mtext" placeholder="Descripción" />
+    <label class="mlabel">Nota <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></label>
+    <input type="text" class="minp" id="mnote" placeholder="Detalle adicional" />
+    <div class="ctog" id="ctog" onclick="toggleW()">
+      <div class="tdot"></div>
+      <span class="tlabel">Marcar como Advertencia ⚠️</span>
+    </div>
+    <div class="mbtns">
+      <button class="mcancel" onclick="closeModal()">Cancelar</button>
+      <button class="msave" onclick="saveModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// ── FIREBASE ──────────────────────────────────────────────────
+const DB_URL = "https://rvlista-b7a7e-default-rtdb.firebaseio.com";
+const DB_PATH = "rvoperaciones2026";
+let db, dbRef, saveTimer;
+
+function setSync(msg,cls){const s=document.getElementById('sync');s.textContent=msg;s.className='sync'+(cls?' '+cls:'');}
+
+function initDB(){
+  try{
+    let app;
+    try{app=firebase.app();}catch(e){app=firebase.initializeApp({databaseURL:DB_URL});}
+    db=firebase.database(app);
+    dbRef=db.ref(DB_PATH);
+    setSync('⟳ Conectando...','on');
+    dbRef.on('value',snap=>{
+      const val=snap.val();
+      if(val&&val.phases&&val.checked!==undefined){
+        phases=val.phases;
+        checked=val.checked||{};
+      } else {
+        phases=JSON.parse(JSON.stringify(DEFAULTS));
+        checked={};
+        push();
+      }
+      setSync('● En vivo · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),'ok');
+      render();
+    },err=>setSync('✗ Error: '+err.message,'err'));
+  }catch(e){setSync('✗ '+e.message,'err');}
+}
+
+function push(){
+  if(!dbRef)return;
+  setSync('⟳ Guardando...','on');
+  dbRef.set({phases,checked})
+    .then(()=>setSync('● Guardado · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),'ok'))
+    .catch(e=>setSync('✗ '+e.message,'err'));
+}
+function schedulePush(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(push,600);}
+
+// ── DATA ──────────────────────────────────────────────────────
+const DEFAULTS = [
+  { id:"pickup", icon:"🔑", title:"Recepción del RV", cls:"c-pickup", phase:"pickup", items:[
+    {id:"p1",text:"Grabar video walkthrough completo con el dueño",note:"Documenta condición, altura, ancho, tipo de combustible",warn:true},
+    {id:"p2",text:"Confirmar altura y ancho del RV",note:"Anotar en el celular — verificar antes de cada puente/túnel",warn:true},
+    {id:"p3",text:"Confirmar tipo de combustible (gasolina o diesel)",note:"",warn:true},
+    {id:"p4",text:"Aprender cómo usar shore power (corriente del campamento)",note:"Pedestal OFF → conectar cable → pedestal ON → verificar panel",warn:false},
+    {id:"p5",text:"Confirmar generador — reglas de uso y horas permitidas",note:"",warn:false},
+    {id:"p6",text:"Confirmar baterías, breakers y adaptadores 30A/50A",note:"",warn:false},
+    {id:"p7",text:"Confirmar city water, tanque fresco, bomba de agua y calentador",note:"Saber dónde están las llaves y switches",warn:false},
+    {id:"p8",text:"Confirmar propano — shutoff, estufa, horno, calefacción",note:"Saber qué hacer si hueles gas",warn:true},
+    {id:"p9",text:"Practicar slideouts — cómo extender y retraer",note:"Solo cuando está nivelado, en claro, y visto desde afuera",warn:false},
+    {id:"p10",text:"Practicar awning — cómo abrir y cerrar",note:"Retraer cuando hay viento, lluvia o al dormir",warn:false},
+    {id:"p11",text:"Practicar leveling jacks y estabilizadores",note:"",warn:false},
+    {id:"p12",text:"Practicar dump valves — negro y gris",note:"Negro SIEMPRE cerrado hasta vaciar",warn:true},
+    {id:"p13",text:"Verificar monitor panel — niveles de tanques y batería",note:"",warn:false},
+    {id:"p14",text:"Confirmar contactos de emergencia del dueño",note:"Guardar en el celular",warn:true},
+    {id:"p15",text:"Confirmar qué incluye el RV: sábanas, toallas, cocina, sillas",note:"",warn:false},
+    {id:"p16",text:"Verificar: manguera de agua, regulador de presión, sewer hose, chocks, bloques niveladores",note:"Si no están, conseguirlos antes de salir",warn:true},
+    {id:"p17",text:"Tomar fotos detalladas del exterior — todos los lados",note:"Documentar cualquier daño previo",warn:true},
+    {id:"p18",text:"Tomar fotos del interior — cocina, baño, camas, paneles",note:"",warn:false},
+    {id:"p19",text:"Confirmar expectativas de devolución — combustible, limpieza, tanques",note:"",warn:true},
+  ]},
+  { id:"firstdrive", icon:"🚗", title:"Antes del Primer Manejo", cls:"c-drive", phase:"pickup", items:[
+    {id:"fd1",text:"Ajustar espejos — ambos lados y espejo trasero",note:"Los RVs no tienen ventana trasera",warn:true},
+    {id:"fd2",text:"Verificar ruta en GPS — altura de puentes y ancho de carriles",note:"Usar app RV específica o Waze con configuración de RV",warn:true},
+    {id:"fd3",text:"Propano apagado si el dueño lo requiere o si hay túneles en la ruta",note:"",warn:false},
+    {id:"fd4",text:"Nada suelto en contadores, camas, piso o dashboard",note:"",warn:true},
+    {id:"fd5",text:"Gabinetes, refri, ventanas, ventiladores de techo y cajones cerrados",note:"",warn:true},
+    {id:"fd6",text:"Walkaround 360° completo antes de mover",note:"Nada conectado, desplegado, abierto, suelto o en el camino",warn:true},
+  ]},
+  { id:"arrive", icon:"🏕️", title:"Llegada al Campamento", cls:"c-arrive", phase:"camp", items:[
+    {id:"a1",text:"Posicionar RV cerca de las conexiones — que las mangueras alcancen sin tensión",note:"",warn:false},
+    {id:"a2",text:"Verificar espacio para: árboles, postes, mesa, vecinos, awning y slideouts",note:"",warn:true},
+    {id:"a3",text:"Nivelar adelante/atrás y lado/lado",note:"Usar bloques o auto-level, luego verificar manualmente",warn:false},
+    {id:"a4",text:"Poner chocks a las ruedas ANTES de cualquier otra cosa",note:"",warn:true},
+    {id:"a5",text:"Extender slideouts solo cuando está nivelado, en claro, vigilado desde afuera",note:"",warn:true},
+    {id:"a6",text:"Bajar estabilizadores (NO para nivelar — solo para estabilizar)",note:"",warn:false},
+  ]},
+  { id:"connect", icon:"⚡", title:"Conectar Servicios", cls:"c-connect", phase:"camp", items:[
+    {id:"cn1",text:"ELÉCTRICO: Pedestal OFF → conectar cable RV → Pedestal ON → verificar panel",note:"",warn:false},
+    {id:"cn2",text:"En 30A: NO correr AC + microondas + secador al mismo tiempo",note:"Salta el breaker",warn:true},
+    {id:"cn3",text:"AGUA: Regulador en la llave → manguera blanca potable → entrada city water → bomba OFF",note:"",warn:false},
+    {id:"cn4",text:"Sin city water: llenar tanque fresco, encender bomba solo cuando se usa",note:"",warn:false},
+    {id:"cn5",text:"SEWER: Conectar firmemente, mantener válvula NEGRA cerrada hasta vaciar",note:"",warn:true},
+    {id:"cn6",text:"Encender calentador de agua — esperar 15-30 min antes de usar",note:"'Navy showers' — cortas para conservar agua",warn:false},
+  ]},
+  { id:"during", icon:"🌙", title:"Durante el Campamento", cls:"c-during", phase:"camp", items:[
+    {id:"du1",text:"Revisar niveles de tanques diariamente",note:"Vaciar al llegar a 2/3 lleno o cada 3-4 días",warn:true},
+    {id:"du2",text:"Usar ventiladores de techo cuando sea posible",note:"AC necesita shore power o generador — no funciona solo con batería",warn:false},
+    {id:"du3",text:"Retraer awning cuando hay viento, lluvia fuerte, al salir o al dormir",note:"",warn:true},
+    {id:"du4",text:"Gabinetes siempre con seguro, objetos pesados abajo",note:"Asegurar todo antes de mover el RV aunque sea poco",warn:true},
+    {id:"du5",text:"Verificar que el refrigerador esté en modo eléctrico (no propano) cuando hay shore power",note:"",warn:false},
+    {id:"du6",text:"Verificar luces exteriores y steps antes de dormir",note:"",warn:false},
+  ]},
+  { id:"dump", icon:"🚽", title:"Vaciar Tanques", cls:"c-dump", phase:"camp", items:[
+    {id:"dm1",text:"Ponerse guantes antes de tocar cualquier manguera de sewer",note:"",warn:true},
+    {id:"dm2",text:"Conectar sewer hose del RV al dump station firmemente",note:"",warn:true},
+    {id:"dm3",text:"Abrir válvula NEGRA primero — drenar completamente — cerrar válvula",note:"",warn:true},
+    {id:"dm4",text:"Abrir válvula GRIS segundo — drena y enjuaga la manguera — cerrar válvula",note:"",warn:false},
+    {id:"dm5",text:"Desconectar por el lado del dump station primero, luego por el lado del RV",note:"",warn:false},
+    {id:"dm6",text:"Enjuagar manguera y guardar separada del resto del equipo",note:"",warn:false},
+    {id:"dm7",text:"Agregar 2-3 galones de agua + tratamiento para tanque negro",note:"Siempre después de vaciar",warn:true},
+  ]},
+  { id:"breakcamp", icon:"📦", title:"Salir del Campamento", cls:"c-depart", phase:"move", items:[
+    {id:"bc1",text:"Slideouts completamente retraídos",note:"",warn:true},
+    {id:"bc2",text:"Awning completamente retraído y asegurado",note:"",warn:true},
+    {id:"bc3",text:"Jacks estabilizadores y niveladores levantados",note:"",warn:true},
+    {id:"bc4",text:"Cable eléctrico, manguera de agua y sewer hose desconectados y guardados",note:"",warn:true},
+    {id:"bc5",text:"Chocks removidos",note:"",warn:true},
+    {id:"bc6",text:"Compartimentos exteriores cerrados y asegurados",note:"",warn:true},
+  ]},
+  { id:"driving", icon:"🛣️", title:"Check Interior Antes de Mover", cls:"c-drive", phase:"move", items:[
+    {id:"dr1",text:"Gabinetes, refri, puerta del baño, ventanas, ventiladores y cajones cerrados",note:"",warn:true},
+    {id:"dr2",text:"Nada suelto en contadores, camas, dashboard o piso",note:"",warn:true},
+    {id:"dr3",text:"Espejos ajustados correctamente",note:"",warn:false},
+    {id:"dr4",text:"Ruta verificada — altura de puentes y curvas cerradas",note:"",warn:true},
+    {id:"dr5",text:"Propano apagado si la ruta tiene túneles",note:"",warn:false},
+    {id:"dr6",text:"Walkaround 360° final antes de mover",note:"Nada conectado, desplegado, abierto, suelto o en el camino",warn:true},
+  ]},
+  { id:"return", icon:"🏠", title:"Devolución del RV", cls:"c-return", phase:"return", items:[
+    {id:"rt1",text:"Llenar combustible al nivel requerido en el contrato",note:"",warn:true},
+    {id:"rt2",text:"Rellenar propano si el contrato lo requiere",note:"",warn:false},
+    {id:"rt3",text:"Vaciar y enjuagar tanques negro y gris",note:"",warn:true},
+    {id:"rt4",text:"Limpiar cocina — superficies, estufa, refri y microondas",note:"",warn:false},
+    {id:"rt5",text:"Limpiar baño — inodoro, lavabo y regadera",note:"",warn:false},
+    {id:"rt6",text:"Barrer y trapear pisos",note:"",warn:false},
+    {id:"rt7",text:"Bolsear toda la basura y sacarla",note:"",warn:false},
+    {id:"rt8",text:"Retirar todas las cosas personales de todos los compartimentos y gabinetes",note:"Revisar debajo de camas y en cajones",warn:true},
+    {id:"rt9",text:"Tomar fotos/video del exterior e interior al momento de devolver",note:"Antes de que el dueño lo reciba",warn:true},
+    {id:"rt10",text:"Reportar cualquier problema inmediatamente al dueño",note:"Los daños pequeños empeoran cuando se ocultan",warn:true},
+  ]},
+  { id:"emergency", icon:"🚨", title:"Emergencias — Llamar al Dueño Si...", cls:"c-emergency", phase:"emergency", items:[
+    {id:"em1",text:"Hueles propano / huevos podridos",note:"Cerrar válvula → abrir puertas/ventanas → salir → NO tocar switches",warn:true},
+    {id:"em2",text:"Slideout, awning, jacks o steps se traban o suenan raro",note:"Parar — no forzar — llamar",warn:true},
+    {id:"em3",text:"El breaker sigue disparándose o aparecen luces de advertencia",note:"",warn:true},
+    {id:"em4",text:"Tanque marca lleno, inodoro regurgita, drenajes regresan o hay fugas de agua",note:"",warn:true},
+    {id:"em5",text:"Chocaste con ramas bajas, bordillos, postes o cualquier parte del RV",note:"Reportar inmediatamente — los daños empeoran si se ocultan",warn:true},
+    {id:"em6",text:"Número de emergencias Coach-Net 24/7",note:"877-978-7222 — asistencia en carretera incluida",warn:false},
+    {id:"em7",text:"Número del dueño del RV en Outdoorsy",note:"Disponible en la app de Outdoorsy",warn:false},
+  ]},
+];
+
+// Phase definitions
+const PHASE_DEFS = [
+  {id:"pickup",  label:"🔑 Recepción"},
+  {id:"camp",    label:"🏕️ Campamento"},
+  {id:"move",    label:"🛣️ En Ruta"},
+  {id:"return",  label:"🏠 Devolución"},
+  {id:"emergency",label:"🚨 Emergencias"},
+];
+
+// ── STATE ─────────────────────────────────────────────────────
+let phases = [];
+let checked = {};
+let activePhase = "pickup";
+let modalMode = null;
+let modalCtx = {};
+let warnOn = false;
+
+function uid(){ return 'i'+Math.random().toString(36).substr(2,8); }
+function findSec(id){ return phases.find(s=>s.id===id); }
+function findItem(id){ for(const s of phases){const i=s.items.find(x=>x.id===id);if(i)return i;} return null; }
+
+// ── TOGGLE ────────────────────────────────────────────────────
+function toggle(id){
+  checked[id]=!checked[id];
+  schedulePush();
+  const el=document.getElementById('itm-'+id);
+  if(el){ if(checked[id]) el.classList.add('done'); else el.classList.remove('done'); }
+  updateStats();
+}
+
+// ── RESET ─────────────────────────────────────────────────────
+function resetPhase(){
+  const name=PHASE_DEFS.find(p=>p.id===activePhase)?.label||activePhase;
+  if(!confirm('¿Reiniciar checks de la fase actual: '+name+'?')) return;
+  const ids=phases.filter(s=>s.phase===activePhase).flatMap(s=>s.items.map(i=>i.id));
+  ids.forEach(id=>delete checked[id]);
+  schedulePush(); render();
+}
+function resetAll(){
+  if(!confirm('¿Reiniciar TODOS los checks de todas las fases?')) return;
+  checked={};
+  schedulePush(); render();
+}
+
+// ── PHASE ─────────────────────────────────────────────────────
+function setPhase(id){
+  activePhase=id;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const bt=document.getElementById('tab-'+id);
+  if(bt) bt.classList.add('active');
+  render();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function setWarn(v){ warnOn=v; const t=document.getElementById('ctog'); if(v) t.classList.add('on'); else t.classList.remove('on'); }
+function toggleW(){ setWarn(!warnOn); }
+
+function openEdit(secId,itemId){
+  const item=findItem(itemId); if(!item) return;
+  modalMode='edit'; modalCtx={secId,itemId};
+  document.getElementById('mtitle').textContent='✏️ Editar ítem';
+  document.getElementById('mtext').value=item.text;
+  document.getElementById('mnote').value=item.note||'';
+  setWarn(!!item.warn);
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('mtext').focus(),80);
+}
+function openAdd(secId){
+  modalMode='add'; modalCtx={secId};
+  document.getElementById('mtitle').textContent='➕ Agregar ítem';
+  document.getElementById('mtext').value='';
+  document.getElementById('mnote').value='';
+  setWarn(false);
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('mtext').focus(),80);
+}
+function saveModal(){
+  const t=document.getElementById('mtext').value.trim(); if(!t) return;
+  const n=document.getElementById('mnote').value.trim();
+  if(modalMode==='edit'){
+    const item=findItem(modalCtx.itemId);
+    if(item){item.text=t;item.note=n;item.warn=warnOn;}
+  } else {
+    const s=findSec(modalCtx.secId);
+    if(s) s.items.push({id:uid(),text:t,note:n,warn:warnOn});
+  }
+  schedulePush(); closeModal(); render();
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  modalMode=null; modalCtx={};
+}
+function overlayClick(e){ if(e.target===document.getElementById('modal')) closeModal(); }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeModal();
+  if(e.key==='Enter'&&document.getElementById('modal').classList.contains('open')
+    &&document.activeElement.tagName!=='BUTTON') saveModal();
+});
+
+function delItem(secId,itemId){
+  const s=findSec(secId); if(!s) return;
+  s.items=s.items.filter(i=>i.id!==itemId);
+  delete checked[itemId];
+  schedulePush(); render();
+}
+
+// ── STATS ─────────────────────────────────────────────────────
+function updateStats(){
+  const cur=phases.filter(s=>s.phase===activePhase);
+  const all=cur.flatMap(s=>s.items);
+  const total=all.length, done=all.filter(i=>checked[i.id]).length;
+  const pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('cnt').textContent=done+' de '+total+' en esta fase';
+  document.getElementById('pfill').style.width=pct+'%';
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function toggleSec(id){
+  const el=document.getElementById('sec-'+id);
+  if(el) el.classList.toggle('collapsed');
+}
+
+function render(){
+  // Tabs
+  const tabsEl=document.getElementById('tabs');
+  tabsEl.innerHTML='';
+  PHASE_DEFS.forEach(p=>{
+    const bt=document.createElement('button');
+    bt.className='tab'+(p.id===activePhase?' active':'');
+    bt.id='tab-'+p.id;
+    bt.textContent=p.label;
+    bt.onclick=()=>setPhase(p.id);
+    tabsEl.appendChild(bt);
+  });
+
+  // Sections
+  const wrap=document.getElementById('main-wrap');
+  wrap.innerHTML='';
+
+  // Emergency warning box
+  if(activePhase==='emergency'){
+    const wb=document.createElement('div');
+    wb.className='warn-box';
+    wb.innerHTML=`<h3>⚠️ Detente y llama al dueño si...</h3>
+      <div class="warn-item">🔴 Hueles propano/huevos podridos — sal inmediatamente, no toques switches</div>
+      <div class="warn-item">🔴 Slideout, awning o jacks se traban — no los fuerces</div>
+      <div class="warn-item">🔴 Breaker se dispara repetidamente o hay luces de advertencia</div>
+      <div class="warn-item">🔴 Inodoro regurgita, hay fugas o drenajes regresan</div>
+      <div class="warn-item">🔴 Chocaste con algo — reportar inmediatamente</div>
+      <div class="warn-item" style="font-weight:700">📞 Coach-Net 24/7: 877-978-7222</div>`;
+    wrap.appendChild(wb);
+  }
+
+  const curSecs=phases.filter(s=>s.phase===activePhase);
+  if(curSecs.length===0){
+    wrap.innerHTML='<div class="empty"><div style="font-size:40px;margin-bottom:10px">✅</div><p style="font-size:16px;color:var(--muted)">Fase completada</p></div>';
+    updateStats(); return;
+  }
+
+  curSecs.forEach(sec=>{
+    const doneC=sec.items.filter(i=>checked[i.id]).length;
+    const outer=document.createElement('div');
+    outer.className='wrap';
+    const div=document.createElement('div');
+    div.className='section';
+    div.id='sec-'+sec.id;
+
+    const hdr=document.createElement('div');
+    hdr.className='sec-hdr '+sec.cls;
+    hdr.innerHTML=`<span class="sec-icon">${sec.icon}</span><span class="sec-title">${sec.title}</span><span class="sec-badge">${doneC}/${sec.items.length}</span><span class="chev">▾</span>`;
+    hdr.onclick=()=>toggleSec(sec.id);
+    div.appendChild(hdr);
+
+    const body=document.createElement('div');
+    body.className='sec-body';
+    sec.items.forEach(item=>body.appendChild(buildItem(sec.id,item)));
+
+    const ar=document.createElement('div');
+    ar.className='add-row';
+    const ab=document.createElement('button');
+    ab.className='add-ibtn';
+    ab.textContent='+ Agregar ítem';
+    ab.onclick=(e)=>{e.stopPropagation();openAdd(sec.id);};
+    ar.appendChild(ab);
+    body.appendChild(ar);
+
+    div.appendChild(body);
+    outer.appendChild(div);
+    wrap.appendChild(outer);
+  });
+
+  updateStats();
+}
+
+function buildItem(secId,item){
+  const isD=!!checked[item.id];
+  const div=document.createElement('div');
+  div.className='item'+(isD?' done':'');
+  div.id='itm-'+item.id;
+  div.innerHTML=`
+    <div class="chkbox" onclick="toggle('${item.id}')"><span class="ck">✓</span></div>
+    <div class="ibody" onclick="toggle('${item.id}')">
+      <div class="itext">${item.text}</div>
+      ${item.note?`<div class="inote">${item.note}</div>`:''}
+      ${item.warn&&!isD?`<span class="warn-pill">⚠️ Importante</span>`:''}
+    </div>
+    <div class="iacts">
+      <button class="abtn" onclick="openEdit('${secId}','${item.id}')">✏️</button>
+      <button class="abtn" onclick="delItem('${secId}','${item.id}')">🗑️</button>
+    </div>`;
+  return div;
+}
+
+// ── START ─────────────────────────────────────────────────────
+initDB();
+</script>
+</body>
+</html>
