@@ -134,15 +134,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 </head>
 <body>
 <div style="background:#0D7377;display:flex;border-bottom:2px solid #F5A623;position:sticky;top:0;z-index:999">
-  <a href="index.html" style="flex:1;padding:11px 8px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:700;color:#1A2E4A;background:#F5A623;text-decoration:none;border-right:1px solid rgba(0,0,0,.15)">📦 Empaque</a>
-  <a href="rv-operaciones.html" style="flex:1;padding:11px 8px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.9);text-decoration:none;border-right:1px solid rgba(0,0,0,.15)">🚐 Operaciones</a>
-  <a href="rv-itinerario.html" style="flex:1;padding:11px 8px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.9);text-decoration:none">🗺️ Itinerario</a>
+  <a href="index.html" style="flex:1;padding:12px 8px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:700;color:#1A2E4A;background:#F5A623;text-decoration:none;border-right:1px solid rgba(0,0,0,.15)">✈️ Preparación</a>
+  <a href="rv-operaciones.html" style="flex:1;padding:12px 8px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.9);text-decoration:none;border-right:1px solid rgba(0,0,0,.15)">🚐 RV Operaciones</a>
+  <a href="rv-itinerario.html" style="flex:1;padding:12px 8px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:13px;font-weight:700;color:rgba(255,255,255,.9);text-decoration:none">🗺️ Itinerario</a>
 </div>
 
 <div class="header">
   <div class="header-top">
     <div>
-      <h1>🚐 Lista Pre-Viaje RV</h1>
+      <h1>✈️ Preparación del Viaje</h1>
       <p id="header-sub">Viaje Familiar · Junio 5–14, 2026</p>
     </div>
     <div style="display:flex;gap:6px;flex-shrink:0">
@@ -340,6 +340,7 @@ let db = null;
 let dbRef = null;
 let data = [];
 let checked = {};
+let openSections = {};
 let filter = 'all';
 let modalMode = null;
 let modalCtx = {};
@@ -546,10 +547,7 @@ function addSec(){
   inp.value='';
   scheduleSave(); render();
 }
-function toggleSec(id){
-  const el=document.getElementById('sec-'+id);
-  if(el) el.classList.toggle('collapsed');
-}
+function toggleSec(id){const el=document.getElementById('sec-'+id);if(!el)return;el.classList.toggle('collapsed');openSections[id]=!el.classList.contains('collapsed');scheduleSave();}
 
 // ─── STATS ────────────────────────────────────────────────────
 function updateStats(){
@@ -575,7 +573,7 @@ function render(){
     const outer=document.createElement('div');
     outer.className='sec-wrap';
     const div=document.createElement('div');
-    div.className='section collapsed';
+    div.className='section'+(openSections[sec.id]?' ':' collapsed');
     div.id='sec-'+sec.id;
 
     const hdr=document.createElement('div');
