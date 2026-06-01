@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🗺️ Itinerario RV — Viaje 2026</title>
+<style>
+:root{
+  --navy:#1A2E4A;--teal:#0D7377;--gold:#F5A623;
+  --green:#2E7D32;--gl:#E8F5E9;
+  --red:#C62828;--rl:#FFEBEE;--rb:#EF9A9A;
+  --bg:#F0F2F5;--text:#1A2E4A;--muted:#6B7C8D;
+  --border:#E0E0E0;--r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px}
+
+/* TOP NAV between apps */
+.appnav{background:#0D7377;display:flex;border-bottom:2px solid #F5A623;position:sticky;top:0;z-index:999}
+.appnav a{flex:1;padding:11px 8px;text-align:center;font-size:13px;font-weight:700;text-decoration:none;color:rgba(255,255,255,.85);border-right:1px solid rgba(0,0,0,.1)}
+.appnav a:last-child{border-right:none}
+.appnav a.here{background:#F5A623;color:#1A2E4A}
+
+/* HEADER */
+.header{background:var(--navy);color:#fff;padding:14px 16px 0;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.header h1{font-size:18px;font-weight:700;color:var(--gold);line-height:1.2;margin-bottom:2px}
+.header p{font-size:12px;color:rgba(255,255,255,.6);margin-bottom:10px}
+.pcnt{font-size:11px;color:rgba(255,255,255,.55);display:flex;justify-content:space-between;margin-bottom:4px}
+.pct{font-size:18px;font-weight:700;color:var(--gold)}
+.pbg{background:rgba(255,255,255,.15);border-radius:99px;height:5px;overflow:hidden;margin-bottom:10px}
+.pfill{background:var(--gold);height:5px;border-radius:99px;transition:width .3s;width:0%}
+.sync{font-size:11px;color:rgba(255,255,255,.4);text-align:center;padding-bottom:8px;min-height:20px}
+.sync.on{color:var(--gold)}.sync.ok{color:#81C784}.sync.err{color:#EF9A9A}
+
+/* DESTINATION TABS */
+.dest-tabs{display:flex;overflow-x:auto;background:var(--navy);padding:0 10px 12px;gap:6px;scrollbar-width:none;border-top:1px solid rgba(255,255,255,.08)}
+.dest-tabs::-webkit-scrollbar{display:none}
+.dtab{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);transition:all .15s;white-space:nowrap}
+.dtab.active{color:var(--navy);border-color:transparent}
+
+/* DESTINATION COLORS */
+.dest-destin .dtab-destin.active{background:#0277BD}
+.dest-nola .dtab-nola.active{background:#6A1B9A}
+.dest-chatt .dtab-chatt.active{background:#1565C0}
+.dest-smokies .dtab-smokies.active{background:#2E7D32}
+.dest-regreso .dtab-regreso.active{background:#AD1457}
+
+/* DAY HEADER color by dest */
+.dest-destin .day-hdr{background:linear-gradient(135deg,#01579B,#0277BD);color:#fff}
+.dest-nola .day-hdr{background:linear-gradient(135deg,#4A148C,#6A1B9A);color:#fff}
+.dest-chatt .day-hdr{background:linear(135deg,#0D47A1,#1565C0);background:linear-gradient(135deg,#0D47A1,#1565C0);color:#fff}
+.dest-smokies .day-hdr{background:linear-gradient(135deg,#1B5E20,#2E7D32);color:#fff}
+.dest-regreso .day-hdr{background:linear-gradient(135deg,#880E4F,#AD1457);color:#fff}
+
+/* SECTIONS */
+.wrap{padding:10px 13px 0}
+.section{margin-bottom:11px}
+.day-hdr{display:flex;align-items:center;gap:9px;padding:12px 14px;border-radius:var(--r) var(--r) 0 0;cursor:pointer;user-select:none}
+.day-icon{font-size:20px}
+.day-info{flex:1}
+.day-title{font-size:15px;font-weight:700;line-height:1.2}
+.day-sub{font-size:11px;opacity:.8;margin-top:2px}
+.day-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:rgba(255,255,255,.25);white-space:nowrap;align-self:flex-start;margin-top:2px}
+.chev{font-size:14px;transition:transform .2s;opacity:.8}
+.section.collapsed .chev{transform:rotate(-90deg)}
+.sec-body{background:#fff;border-radius:0 0 var(--r) var(--r);overflow:hidden;border:1.5px solid var(--border);border-top:none}
+.section.collapsed .sec-body{display:none}
+
+/* ITEMS */
+.item{display:flex;align-items:flex-start;gap:11px;padding:13px 12px 13px 14px;border-bottom:1px solid var(--border)}
+.item:last-of-type{border-bottom:none}
+.item.done{background:var(--gl)}
+.chkbox{width:28px;height:28px;min-width:28px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:#fff;margin-top:1px}
+.item.done .chkbox{background:var(--green);border-color:var(--green)}
+.ck{color:#fff;font-size:15px;font-weight:800;display:none}
+.item.done .ck{display:block}
+.ibody{flex:1;cursor:pointer;min-width:0}
+.itext{font-size:17px;line-height:1.4;color:var(--text);font-weight:500;word-break:break-word}
+.item.done .itext{text-decoration:line-through;color:var(--muted)}
+.inote{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.itime{display:inline-block;font-size:12px;font-weight:700;color:#fff;padding:2px 8px;border-radius:99px;background:var(--teal);margin-bottom:4px}
+.warn-pill{display:inline-flex;font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--rl);color:var(--red);border:1px solid var(--rb);margin-top:4px;text-transform:uppercase}
+.item.done .warn-pill,.item.done .itime{opacity:.4}
+.iacts{display:flex;flex-direction:column;gap:3px;flex-shrink:0;margin-top:1px}
+.abtn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.abtn:active{opacity:.6;transform:scale(.9)}
+.add-row{padding:9px 12px;border-top:1px dashed var(--border);background:#fafafa;display:flex}
+.add-ibtn{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:600;cursor:pointer;width:100%}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px 18px 40px;width:100%;max-width:560px}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:14px}
+.ml{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;margin-top:12px;text-transform:uppercase;letter-spacing:.5px}
+.mi{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:16px;color:var(--text);outline:none;font-family:inherit}
+.mi:focus{border-color:var(--teal)}
+.ctog{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;user-select:none}
+.ctog.on{border-color:var(--red);background:var(--rl)}
+.tdot{width:44px;height:26px;border-radius:99px;background:var(--border);position:relative;transition:background .2s;flex-shrink:0}
+.tdot::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.ctog.on .tdot{background:var(--red)}
+.ctog.on .tdot::after{transform:translateX(18px)}
+.mbtns{display:flex;gap:10px;margin-top:16px}
+.mcancel{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:13px;font-size:16px;font-weight:600;color:var(--muted);cursor:pointer}
+.msave{flex:2;background:var(--teal);border:none;border-radius:10px;padding:13px;font-size:16px;font-weight:700;color:#fff;cursor:pointer}
+
+.fab{position:fixed;bottom:22px;right:16px;width:50px;height:50px;background:var(--navy);color:#fff;border-radius:50%;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:200}
+</style>
+</head>
+<body>
+
+<!-- APP NAV -->
+<div class="appnav">
+  <a href="index.html">📦 Empaque</a>
+  <a href="rv-operaciones.html">🚐 Operaciones</a>
+  <a href="rv-itinerario.html" class="here">🗺️ Itinerario</a>
+</div>
+
+<div class="header">
+  <h1>🗺️ Itinerario del Viaje</h1>
+  <p>Junio 5–14, 2026 · Viaje Familiar en RV</p>
+  <div class="pcnt"><span class="pct" id="pct">0%</span><span id="cnt">0 de 0 completados</span></div>
+  <div class="pbg"><div class="pfill" id="pfill"></div></div>
+  <div class="sync" id="sync"></div>
+</div>
+
+<!-- DESTINATION TABS -->
+<div class="dest-tabs" id="dest-tabs"></div>
+
+<!-- CONTENT -->
+<div id="main-wrap"></div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal" onclick="overlayClick(event)">
+  <div class="modal">
+    <h3 id="mtitle">✏️ Editar</h3>
+    <label class="ml">Texto</label>
+    <input type="text" class="mi" id="mtext" placeholder="Descripción de la actividad"/>
+    <label class="ml">Hora <span style="font-weight:400;text-transform:none;font-size:11px">(ej: 9:00am)</span></label>
+    <input type="text" class="mi" id="mtime" placeholder="Opcional"/>
+    <label class="ml">Nota <span style="font-weight:400;text-transform:none;font-size:11px">(opcional)</span></label>
+    <input type="text" class="mi" id="mnote" placeholder="Dirección, detalle, consejo"/>
+    <div class="ctog" id="ctog" onclick="toggleW()">
+      <div class="tdot"></div>
+      <span style="font-size:15px;font-weight:500;flex:1">Marcar como Alerta ⚠️</span>
+    </div>
+    <div class="mbtns">
+      <button class="mcancel" onclick="closeModal()">Cancelar</button>
+      <button class="msave" onclick="saveModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const DB_URL  = "https://rvlista-b7a7e-default-rtdb.firebaseio.com";
+const DB_PATH = "rvitinerario2026";
+let db, dbRef, saveTimer;
+
+function setSync(m,c){const s=document.getElementById('sync');s.textContent=m;s.className='sync'+(c?' '+c:'');}
+function initDB(){
+  try{
+    let app; try{app=firebase.app();}catch(e){app=firebase.initializeApp({databaseURL:DB_URL});}
+    db=firebase.database(app); dbRef=db.ref(DB_PATH);
+    setSync('⟳ Conectando...','on');
+    dbRef.on('value',snap=>{
+      const v=snap.val();
+      if(v&&v.dests&&v.checked!==undefined){dests=v.dests;checked=v.checked||{};}
+      else{dests=JSON.parse(JSON.stringify(DEFAULTS));checked={};push();}
+      setSync('● En vivo · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),'ok');
+      render();
+    },e=>setSync('✗ '+e.message,'err'));
+  }catch(e){setSync('✗ '+e.message,'err');}
+}
+function push(){
+  if(!dbRef)return;
+  setSync('⟳ Guardando...','on');
+  dbRef.set({dests,checked})
+    .then(()=>setSync('● Guardado · '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),'ok'))
+    .catch(e=>setSync('✗ '+e.message,'err'));
+}
+function sched(){if(saveTimer)clearTimeout(saveTimer);saveTimer=setTimeout(push,600);}
+
+// ── DATA ──────────────────────────────────────────────────────
+const DEFAULTS = [
+  {
+    id:"destin", label:"🌴 Destin", cls:"dest-destin", tab:"dtab-destin",
+    days:[
+      { id:"d1", icon:"🌅", title:"Bienvenidos al Golfo", sub:"Viernes 5 de junio · Día 1", items:[
+        {id:"d1a",text:"Salir de Parkland temprano — I-75 N hasta I-10 W",time:"",note:"~6.5 hrs de manejo",warn:false},
+        {id:"d1b",text:"Llenar tanque del RV en Gainesville",time:"",note:"Más barato que en el Panhandle — no esperar",warn:true},
+        {id:"d1c",text:"Parada en el supermercado en Fort Walton Beach",time:"",note:"Pocas tiendas cerca del parque — abastecerse aquí",warn:true},
+        {id:"d1d",text:"Check-in Topsail Hill SP · Loop 101 · Sitio 055",time:"3:00pm",note:"✅ RESERVADO · Conf #22967722",warn:false},
+        {id:"d1e",text:"Preguntar horario del tranvía a la playa al check-in",time:"",note:"El tranvía opera pocas horas — coordinar para mañana",warn:true},
+        {id:"d1f",text:"Instalar campamento — sillas, luces, hielera",time:"",note:"",warn:false},
+        {id:"d1g",text:"Caminata al atardecer en el Golfo",time:"Atardecer",note:"",warn:false},
+        {id:"d1h",text:"Cena: Harbor Docks o Boshamps Seafood",time:"Noche",note:"Favoritos locales frente al agua",warn:false},
+      ]},
+      { id:"d2", icon:"🏄", title:"Playa, Pedales y Cerveza Artesanal", sub:"Sábado 6 de junio · Día 2", items:[
+        {id:"d2a",text:"Playa via tranvía — mañana en el Golfo",time:"Mañana",note:"Arena blanca, agua esmeralda — disfrutar",warn:false},
+        {id:"d2b",text:"Alquiler de kayaks en el parque",time:"",note:"Preguntar disponibilidad al check-in",warn:false},
+        {id:"d2c",text:"Timpoochee Trail en bicicleta",time:"Tarde",note:"19 millas costeras · Alquiler en Rosemary Beach ~$25/día",warn:false},
+        {id:"d2d",text:"Pesca en Destin Harbor (opcional)",time:"",note:"Showintail Inshore o Just Rite Sportfishing",warn:false},
+        {id:"d2e",text:"Atardecer desde la playa",time:"Atardecer",note:"",warn:false},
+        {id:"d2f",text:"Cena: Destin Brewery — azotea con vistas",time:"Noche",note:"o Harbor Docks",warn:false},
+      ]},
+    ]
+  },
+  {
+    id:"nola", label:"🎷 New Orleans", cls:"dest-nola", tab:"dtab-nola",
+    days:[
+      { id:"n1", icon:"🏛️", title:"Jazz, Historia y Beignets a Medianoche", sub:"Domingo 7 de junio · Día 3", items:[
+        {id:"n1a",text:"Salir de Topsail a las 9am — manejar ~3.5 hrs",time:"9:00am",note:"",warn:false},
+        {id:"n1b",text:"Check-in French Quarter RV Resort",time:"Llegada",note:"✅ RESERVADO · ESTACIONAR RV y no moverla — Uber todo",warn:true},
+        {id:"n1c",text:"National WWII Museum",time:"Tarde",note:"945 Magazine St · ✅ 4 boletos reservados · Cierra 5pm — llegar antes de las 2pm",warn:true},
+        {id:"n1d",text:"Frenchmen Street — jazz en vivo",time:"Noche",note:"Frenchmen Street > Bourbon Street — aquí van los locales",warn:false},
+        {id:"n1e",text:"Café Du Monde — beignets y café au lait",time:"Noche tarde",note:"24/7 · Sin reservación · Parada obligatoria",warn:false},
+      ]},
+      { id:"n2", icon:"🐊", title:"Caimanes, Bicicletas y Alma Criolla", sub:"Lunes 8 de junio · Día 4", items:[
+        {id:"n2a",text:"Salir del RV para Cajun Encounters",time:"10:00am",note:"",warn:true},
+        {id:"n2b",text:"Punto de recogida Cajun Encounters",time:"10:15am",note:"Homewood Suites French Quarter · 317 N Rampart St, 70112 · ✅ RESERVADO",warn:true},
+        {id:"n2c",text:"Tour de pantanos — caimanes, garzas, cipreses",time:"10:15am–3:00pm",note:"Cajun Encounters nos devuelve a las 3pm",warn:false},
+        {id:"n2d",text:"Alquiler de bicicletas — Bywater y Marigny",time:"Tarde",note:"Bicycle Michael's cerca del Quarter",warn:false},
+        {id:"n2e",text:"Bacchanal Wine — bar al aire libre con música en vivo",time:"Noche",note:"600 Poland Ave · Vinos increíbles + música en el patio",warn:false},
+        {id:"n2f",text:"Almuerzo: Parkway Bakery & Tavern",time:"Almuerzo",note:"El mejor po'boy de la ciudad · Solo efectivo · Icónico",warn:false},
+        {id:"n2g",text:"Cena: Dooky Chase's Restaurant",time:"Cena",note:"2301 Orleans Ave · Comida criolla legendaria · Sin saco · ✅ Confirmar reservación",warn:true},
+        {id:"n2h",text:"Tranvía St. Charles Ave (opcional)",time:"",note:"$1.25 · Vistas del Garden District",warn:false},
+      ]},
+    ]
+  },
+  {
+    id:"chatt", label:"🏙️ Chattanooga", cls:"dest-chatt", tab:"dtab-chatt",
+    days:[
+      { id:"c1", icon:"🌉", title:"El Puente Icónico y el Río Tennessee", sub:"Martes 9 de junio · Día 5", items:[
+        {id:"c1a",text:"Salir de Nueva Orleans temprano — I-10 E hasta I-59 N",time:"Mañana",note:"~6.5 hrs de manejo directo",warn:false},
+        {id:"c1b",text:"Check-in Raccoon Mountain Campground",time:"Media tarde",note:"✅ RESERVADO · 1 sola noche · Salida miércoles 8am",warn:false},
+        {id:"c1c",text:"Uber al centro de Chattanooga",time:"Tarde",note:"~$15 cada trayecto · NO manejar el RV al centro",warn:true},
+        {id:"c1d",text:"Chattanooga Riverwalk — caminata junto al río Tennessee",time:"Tarde",note:"",warn:false},
+        {id:"c1e",text:"Walnut Street Bridge — puente peatonal icónico",time:"",note:"Excelente foto al atardecer sobre el río",warn:false},
+        {id:"c1f",text:"Coolidge Park — relajarse junto al río",time:"",note:"",warn:false},
+        {id:"c1g",text:"Sunset Rock o Lookout Mountain al atardecer",time:"Atardecer",note:"Vistas espectaculares sobre 3 estados · fácil en auto",warn:false},
+        {id:"c1h",text:"Cena: Easy Bistro o Alleia o Chattanooga Brewing Co.",time:"Noche",note:"Easy Bistro frente al río — excelente",warn:false},
+        {id:"c1i",text:"Preparar todo para salida temprana mañana",time:"Noche",note:"Gran día de viaje hacia las Smokies",warn:true},
+      ]},
+    ]
+  },
+  {
+    id:"smokies", label:"⛰️ Smokies", cls:"dest-smokies", tab:"dtab-smokies",
+    days:[
+      { id:"s1", icon:"🏕️", title:"Bienvenidos a las Montañas — Instalarse y Respirar", sub:"Miércoles 10 de junio · Día 6", items:[
+        {id:"s1a",text:"Salir de Raccoon Mountain",time:"8:00am",note:"~1.5 hrs a Gatlinburg",warn:false},
+        {id:"s1b",text:"Primera parada: Sugarlands Visitor Center",time:"Al llegar",note:"Comprar tarjeta de estacionamiento · Mapa del parque · Preguntar sobre actividad de osos y Cades Cove",warn:true},
+        {id:"s1c",text:"Segunda parada: Townsend, TN — compras para 4 días",time:"",note:"Comida, bebidas, hielo, snacks, equipo de pesca · Mejor precio que Gatlinburg",warn:true},
+        {id:"s1d",text:"Almuerzo: Trailhead Cafe en Townsend",time:"Mediodía",note:"Local, bueno, tranquilo",warn:false},
+        {id:"s1e",text:"Check-in Twin Creek RV Resort · Sitio Waterfront 10",time:"Tarde",note:"✅ RESERVADO · Jun 10–13 · 4 noches",warn:false},
+        {id:"s1f",text:"Recoger auto Turo — Kia Sportage",time:"Tarde",note:"✅ RESERVADO · Entrega en campamento",warn:true},
+        {id:"s1g",text:"Explorar área del río Pigeon — caminata suave",time:"Tarde",note:"Venados comunes · Osos posibles al atardecer",warn:false},
+        {id:"s1h",text:"🔥 Fogata #1 — planear los próximos 3 días",time:"Noche",note:"Asado en campamento · Relajarse · Bienvenidos a las Smokies",warn:false},
+      ]},
+      { id:"s2", icon:"🥾", title:"El Mejor Sendero del Parque — Cascadas y Bosques", sub:"Jueves 11 de junio · Día 7", items:[
+        {id:"s2a",text:"Salida al sendero Alum Cave Trail",time:"7:00am",note:"Llegar al estacionamiento antes de las 7am — se llena a las 9am",warn:true},
+        {id:"s2b",text:"Alum Cave Trail — caminata principal",time:"7:00am–11:00am",note:"4.4 millas ida y vuelta · Acantilados, arcos, vistas · Inicio: Newfound Gap Rd (Hwy 441)",warn:false},
+        {id:"s2c",text:"Almuerzo empacado cerca de Newfound Gap",time:"Mediodía",note:"Llevar comida del campamento",warn:false},
+        {id:"s2d",text:"The Sinks — cascada y pozo natural",time:"Tarde",note:"5 min de desvío en Little River Road · Vale cada segundo",warn:false},
+        {id:"s2e",text:"Elkmont Historic District (opcional)",time:"Tarde",note:"Resort abandonado de 1900s · Historia fascinante · Acceso por Little River Road",warn:false},
+        {id:"s2f",text:"Spruce Flats Falls via Tremont (opcional)",time:"Tarde",note:"2.6 millas · Menos concurrido · Bosque hermoso · Institute Road",warn:false},
+        {id:"s2g",text:"🔥 Fogata #2 — descansar para mañana",time:"Noche",note:"Gran día mañana — Cades Cove sale a las 5:30am",warn:true},
+      ]},
+      { id:"s3", icon:"🐻", title:"Osos al Amanecer, UTV y el Techo de los Apalaches", sub:"Viernes 12 de junio · Día 8", items:[
+        {id:"s3a",text:"Despertar y desayuno rápido en campamento",time:"5:00am",note:"Día muy largo — empieza temprano",warn:true},
+        {id:"s3b",text:"Manejar a Cades Cove",time:"5:30am",note:"30-35 min · Laurel Creek Rd desde Little River Rd",warn:true},
+        {id:"s3c",text:"🐻 Cades Cove al amanecer — circuito 11 millas",time:"5:45–6:00am",note:"Abierto mié-sáb ✅ · Osos en bordes de prados · Venados garantizados · Pavos silvestres · Casas históricas",warn:false},
+        {id:"s3d",text:"Pesca en Little River (opcional)",time:"Mediodía",note:"Solo señuelos artificiales dentro del parque · Licencia TN requerida",warn:false},
+        {id:"s3e",text:"Almuerzo: parar en Townsend de regreso",time:"Mediodía",note:"",warn:false},
+        {id:"s3f",text:"⚠️ Salir hacia UTV Sevierville",time:"2:30pm",note:"Llegar 30 min antes del tour de 3pm",warn:true},
+        {id:"s3g",text:"🏎️ UTV Off-Road — aventura guiada",time:"3:00pm",note:"890 Spurgeon Hollow Rd, Sevierville TN · ✅ RESERVADO · ~2 hrs · Vistas montañosas",warn:false},
+        {id:"s3h",text:"Clingmans Dome al atardecer",time:"Atardecer",note:"Solo auto Turo — RV NO puede subir · Mejor luz, más fresco, menos gente",warn:true},
+        {id:"s3i",text:"Cena final en Gatlinburg",time:"Noche",note:"The Peddler Steakhouse · Smoky Mountain Brewery · Ole Red azotea",warn:false},
+      ]},
+      { id:"s4", icon:"🌊", title:"Rápidos Olímpicos — El Día de la Adrenalina", sub:"Sábado 13 de junio · Día 9", items:[
+        {id:"s4a",text:"Desayuno temprano en campamento",time:"Mañana",note:"",warn:false},
+        {id:"s4b",text:"Manejar al NOC Pigeon River",time:"10:00am",note:"3.5 millas al este de Gatlinburg en Hwy 321 · Solo 15 min desde Twin Creek",warn:false},
+        {id:"s4c",text:"⚠️ Llegar al NOC 30 min antes del turno",time:"10:50am",note:"Turno: 11:20am · ✅ RESERVADO · NO chanclas — usar sandalias de agua",warn:true},
+        {id:"s4d",text:"🌊 Canotaje Upper Pigeon River",time:"11:20am–1:30pm",note:"Nantahala Outdoor Center · Clase III-IV · Curso Olímpico 1996 · Trajes de neopreno disponibles ~$15",warn:false},
+        {id:"s4e",text:"Llevar bolsa seca para teléfonos y billeteras",time:"",note:"DEFINITIVAMENTE se van a mojar",warn:true},
+        {id:"s4f",text:"Llevar ropa seca de cambio en bolsa Ziploc",time:"",note:"Dejarla en el auto antes de entrar al río",warn:true},
+        {id:"s4g",text:"Almuerzo: NOC cafetería o Gatlinburg de regreso",time:"Después del río",note:"",warn:false},
+        {id:"s4h",text:"Tarde libre — Gatlinburg o Pigeon Forge o campamento",time:"Tarde",note:"Relax — gran semana completada",warn:false},
+        {id:"s4i",text:"Última cena en Gatlinburg",time:"Noche",note:"Ole Red azotea · The Peddler · Smoky Mountain Brewery",warn:false},
+        {id:"s4j",text:"Preparar todo para el regreso mañana",time:"Noche",note:"Limpiar RV · Empacar · Vaciar refri · Última fogata opcional",warn:true},
+      ]},
+    ]
+  },
+  {
+    id:"regreso", label:"🏠 Regreso", cls:"dest-regreso", tab:"dtab-regreso",
+    days:[
+      { id:"r1", icon:"🛣️", title:"El Gran Regreso — 11 Horas de Memorias", sub:"Domingo 14 de junio · Día 10", items:[
+        {id:"r1a",text:"Limpiar interior del RV antes del checkout",time:"Antes de las 6am",note:"Más fácil hacerlo la noche anterior",warn:true},
+        {id:"r1b",text:"Vaciar tanques negro y gris antes de salir",time:"",note:"",warn:true},
+        {id:"r1c",text:"Devolver auto Turo ANTES del checkout del RV",time:"Antes de las 11am",note:"Son ubicaciones diferentes — hacerlo primero",warn:true},
+        {id:"r1d",text:"Checkout Twin Creek · Llenar combustible del RV",time:"11:00am",note:"Llenar full antes de devolver",warn:true},
+        {id:"r1e",text:"Tramo 1: Gatlinburg → Atlanta",time:"~11:00am",note:"~180 millas · ~2.5 hrs",warn:false},
+        {id:"r1f",text:"Parada Atlanta: combustible + almuerzo",time:"~1:30pm",note:"Buckhead o corredor I-75 · Última comida en el camino",warn:false},
+        {id:"r1g",text:"Tramo 2: Atlanta → Ocala",time:"~2:30pm",note:"~430 millas · ~5.5 hrs",warn:false},
+        {id:"r1h",text:"Tramo 3: Ocala → Parkland",time:"~8:00pm",note:"~220 millas · ~3 hrs · 🏠 Llegada estimada 11pm",warn:false},
+      ]},
+      { id:"r2", icon:"🔑", title:"Devolver el RV — Cerrar el Círculo", sub:"Lunes 15 de junio", items:[
+        {id:"r2a",text:"Devolver RV al propietario en Outdoorsy",time:"",note:"",warn:false},
+        {id:"r2b",text:"Inspección final con el propietario",note:"Confirmar millaje, combustible, estado de tanques",time:"",warn:false},
+        {id:"r2c",text:"Tomar fotos del RV al momento de devolver",time:"",note:"Interior y exterior · Antes de que el dueño lo reciba",warn:true},
+        {id:"r2d",text:"Reportar cualquier problema inmediatamente",time:"",note:"Los daños pequeños empeoran cuando se ocultan",warn:true},
+        {id:"r2e",text:"Dejar reseña honesta en Outdoorsy",time:"",note:"",warn:false},
+        {id:"r2f",text:"¡Viaje completado! 🎉",time:"",note:"Destin · Nueva Orleans · Chattanooga · Smoky Mountains · 10 días inolvidables",warn:false},
+      ]},
+    ]
+  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────
+let dests=[], checked={}, activeDest="destin";
+let modalMode=null, modalCtx={}, warnOn=false;
+function uid(){return 'i'+Math.random().toString(36).substr(2,8);}
+function findDest(id){return dests.find(d=>d.id===id);}
+function findDay(destId,dayId){const d=findDest(destId);return d?d.days.find(dy=>dy.id===dayId):null;}
+function findItem(id){for(const d of dests)for(const dy of d.days){const i=dy.items.find(x=>x.id===id);if(i)return i;}return null;}
+
+// ── TOGGLE ────────────────────────────────────────────────────
+function toggle(id){
+  checked[id]=!checked[id];
+  sched();
+  const el=document.getElementById('itm-'+id);
+  if(el){if(checked[id])el.classList.add('done');else el.classList.remove('done');}
+  updateStats();
+}
+
+// ── DEST TAB ──────────────────────────────────────────────────
+function setDest(id){
+  activeDest=id;
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('active'));
+  const bt=document.getElementById('dtab-'+id);
+  if(bt)bt.classList.add('active');
+  render();
+}
+
+// ── MODAL ─────────────────────────────────────────────────────
+function setW(v){warnOn=v;const t=document.getElementById('ctog');if(v)t.classList.add('on');else t.classList.remove('on');}
+function toggleW(){setW(!warnOn);}
+function openEdit(destId,dayId,itemId){
+  const item=findItem(itemId);if(!item)return;
+  modalMode='edit';modalCtx={destId,dayId,itemId};
+  document.getElementById('mtitle').textContent='✏️ Editar actividad';
+  document.getElementById('mtext').value=item.text;
+  document.getElementById('mtime').value=item.time||'';
+  document.getElementById('mnote').value=item.note||'';
+  setW(!!item.warn);
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('mtext').focus(),80);
+}
+function openAdd(destId,dayId){
+  modalMode='add';modalCtx={destId,dayId};
+  document.getElementById('mtitle').textContent='➕ Agregar actividad';
+  document.getElementById('mtext').value='';
+  document.getElementById('mtime').value='';
+  document.getElementById('mnote').value='';
+  setW(false);
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('mtext').focus(),80);
+}
+function saveModal(){
+  const t=document.getElementById('mtext').value.trim();if(!t)return;
+  const ti=document.getElementById('mtime').value.trim();
+  const n=document.getElementById('mnote').value.trim();
+  if(modalMode==='edit'){
+    const item=findItem(modalCtx.itemId);
+    if(item){item.text=t;item.time=ti;item.note=n;item.warn=warnOn;}
+  }else{
+    const day=findDay(modalCtx.destId,modalCtx.dayId);
+    if(day)day.items.push({id:uid(),text:t,time:ti,note:n,warn:warnOn});
+  }
+  sched();closeModal();render();
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');modalMode=null;modalCtx={};}
+function overlayClick(e){if(e.target===document.getElementById('modal'))closeModal();}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeModal();
+  if(e.key==='Enter'&&document.getElementById('modal').classList.contains('open')
+    &&document.activeElement.tagName!=='BUTTON')saveModal();
+});
+function delItem(destId,dayId,itemId){
+  const day=findDay(destId,dayId);if(!day)return;
+  day.items=day.items.filter(i=>i.id!==itemId);
+  delete checked[itemId];sched();render();
+}
+function toggleDay(id){const el=document.getElementById('sec-'+id);if(el)el.classList.toggle('collapsed');}
+
+// ── STATS ─────────────────────────────────────────────────────
+function updateStats(){
+  const dest=findDest(activeDest);
+  if(!dest){document.getElementById('pct').textContent='0%';document.getElementById('cnt').textContent='';return;}
+  const all=dest.days.flatMap(d=>d.items);
+  const total=all.length,done=all.filter(i=>checked[i.id]).length;
+  const pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('cnt').textContent=done+' de '+total+' en '+dest.label;
+  document.getElementById('pfill').style.width=pct+'%';
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function render(){
+  // Destination tabs
+  const tabsEl=document.getElementById('dest-tabs');
+  tabsEl.innerHTML='';
+  dests.forEach(d=>{
+    const bt=document.createElement('button');
+    bt.className='dtab '+d.tab+(d.id===activeDest?' active':'');
+    bt.id='dtab-'+d.id;
+    bt.textContent=d.label;
+    bt.onclick=()=>setDest(d.id);
+    tabsEl.appendChild(bt);
+  });
+
+  // Content
+  const wrap=document.getElementById('main-wrap');
+  wrap.innerHTML='';
+  const dest=findDest(activeDest);
+  if(!dest){updateStats();return;}
+
+  // Wrap with dest class for color theming
+  const destWrap=document.createElement('div');
+  destWrap.className=dest.cls;
+
+  dest.days.forEach(day=>{
+    const doneC=day.items.filter(i=>checked[i.id]).length;
+    const outer=document.createElement('div');
+    outer.className='wrap';
+    const sec=document.createElement('div');
+    sec.className='section';
+    sec.id='sec-'+day.id;
+
+    const hdr=document.createElement('div');
+    hdr.className='day-hdr';
+    hdr.innerHTML=`<span class="day-icon">${day.icon}</span><div class="day-info"><div class="day-title">${day.title}</div><div class="day-sub">${day.sub}</div></div><span class="day-badge">${doneC}/${day.items.length}</span><span class="chev">▾</span>`;
+    hdr.onclick=()=>toggleDay(day.id);
+    sec.appendChild(hdr);
+
+    const body=document.createElement('div');
+    body.className='sec-body';
+    day.items.forEach(item=>body.appendChild(buildItem(dest.id,day.id,item)));
+
+    const ar=document.createElement('div');
+    ar.className='add-row';
+    const ab=document.createElement('button');
+    ab.className='add-ibtn';
+    ab.textContent='+ Agregar actividad';
+    ab.onclick=(e)=>{e.stopPropagation();openAdd(dest.id,day.id);};
+    ar.appendChild(ab);
+    body.appendChild(ar);
+
+    sec.appendChild(body);
+    outer.appendChild(sec);
+    destWrap.appendChild(outer);
+  });
+
+  wrap.appendChild(destWrap);
+  updateStats();
+}
+
+function buildItem(destId,dayId,item){
+  const isD=!!checked[item.id];
+  const div=document.createElement('div');
+  div.className='item'+(isD?' done':'');
+  div.id='itm-'+item.id;
+  div.innerHTML=`
+    <div class="chkbox" onclick="toggle('${item.id}')"><span class="ck">✓</span></div>
+    <div class="ibody" onclick="toggle('${item.id}')">
+      ${item.time?`<span class="itime">⏰ ${item.time}</span><br>`:''}
+      <div class="itext">${item.text}</div>
+      ${item.note?`<div class="inote">${item.note}</div>`:''}
+      ${item.warn&&!isD?`<span class="warn-pill">⚠️ Importante</span>`:''}
+    </div>
+    <div class="iacts">
+      <button class="abtn" onclick="openEdit('${destId}','${dayId}','${item.id}')">✏️</button>
+      <button class="abtn" onclick="delItem('${destId}','${dayId}','${item.id}')">🗑️</button>
+    </div>`;
+  return div;
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+initDB();
+</script>
+</body>
+</html>
