@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🚐 Lista de Empaque — Viaje RV 2026</title>
+<style>
+:root {
+  --navy:#1A2E4A; --teal:#0D7377; --gold:#F5A623;
+  --green:#2E7D32; --gl:#E8F5E9; --gb:#A5D6A7;
+  --red:#C62828; --rl:#FFEBEE; --rb:#EF9A9A;
+  --bg:#F0F2F5; --card:#FFFFFF; --text:#1A2E4A; --muted:#6B7C8D;
+  --border:#E0E0E0; --r:16px; --rs:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
+
+.header{background:var(--navy);color:white;padding:18px 16px 14px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.header-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:10px}
+.header h1{font-size:19px;font-weight:700;color:var(--gold);line-height:1.2}
+.header p{font-size:12px;color:rgba(255,255,255,.65);margin-top:2px}
+.hbtns{display:flex;gap:6px;flex-shrink:0}
+.hbtn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:white;font-size:13px;padding:7px 11px;border-radius:20px;cursor:pointer;white-space:nowrap}
+.pct{font-size:22px;font-weight:700;color:var(--gold)}
+.pcnt{font-size:12px;color:rgba(255,255,255,.65);margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.pbg{background:rgba(255,255,255,.15);border-radius:99px;height:7px;overflow:hidden}
+.pfill{background:var(--gold);height:7px;border-radius:99px;transition:width .35s ease;width:0%}
+
+.filters{display:flex;gap:7px;overflow-x:auto;padding:12px 14px 8px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.fbtn{background:white;border:1.5px solid var(--border);color:var(--muted);font-size:14px;font-weight:500;padding:9px 15px;border-radius:99px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.fbtn.active{background:var(--navy);border-color:var(--navy);color:white}
+
+.sections{padding:0 14px}
+.section{margin-bottom:14px}
+.sec-hdr{display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:var(--r) var(--r) 0 0;cursor:pointer;user-select:none}
+.sec-icon{font-size:20px}
+.sec-title{font-size:15px;font-weight:700;flex:1;line-height:1.2}
+.sec-badge{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.28);white-space:nowrap}
+.sec-chev{font-size:16px;transition:transform .2s}
+.section.collapsed .sec-chev{transform:rotate(-90deg)}
+.sec-items{background:white;border-radius:0 0 var(--r) var(--r);overflow:hidden;border:1.5px solid var(--border);border-top:none}
+.section.collapsed .sec-items{display:none}
+
+/* ITEMS */
+.item{display:flex;align-items:flex-start;gap:12px;padding:14px 14px;border-bottom:1px solid var(--border);position:relative;min-height:56px}
+.item:last-child{border-bottom:none}
+.item.checked{background:var(--gl)}
+.item.alert-item{background:var(--rl);border-left:4px solid var(--red)}
+.item.alert-item.checked{background:var(--gl);border-left:4px solid var(--green)}
+
+.chkbox{width:28px;height:28px;border-radius:8px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .15s;background:white;cursor:pointer}
+.item.checked .chkbox{background:var(--green);border-color:var(--green)}
+.chk-ico{color:white;font-size:15px;font-weight:800;display:none}
+.item.checked .chk-ico{display:block}
+
+.item-body{flex:1;cursor:pointer;min-width:0}
+.item-text{font-size:17px;line-height:1.4;color:var(--text);font-weight:500;word-break:break-word}
+.item.checked .item-text{text-decoration:line-through;color:var(--muted)}
+.item-note{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.crit-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;background:var(--rl);color:var(--red);border:1px solid var(--rb);margin-top:4px;text-transform:uppercase}
+.item.checked .crit-badge{display:none}
+
+/* ITEM ACTION BUTTONS */
+.item-actions{display:flex;flex-direction:column;gap:4px;flex-shrink:0;margin-top:1px}
+.act-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:white;font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .1s}
+.act-btn:active{transform:scale(.93)}
+.act-btn.edit-btn:active{background:#E3F2FD;border-color:#90CAF9;color:#1565C0}
+.act-btn.del-btn:active{background:var(--rl);border-color:var(--rb);color:var(--red)}
+
+/* ADD ITEM ROW */
+.add-row{display:flex;align-items:center;gap:8px;padding:10px 14px;background:white;border-radius:0 0 var(--r) var(--r);border:1.5px solid var(--border);border-top:1px dashed var(--border)}
+.add-inp{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:16px;color:var(--text);outline:none;font-family:inherit}
+.add-inp:focus{border-color:var(--teal)}
+.add-go{background:var(--teal);color:white;border:none;border-radius:8px;padding:10px 14px;font-size:18px;cursor:pointer;flex-shrink:0;line-height:1}
+.add-go:active{opacity:.8}
+
+/* ADD SECTION */
+.add-section-wrap{margin:0 14px 14px;background:white;border-radius:var(--r);border:1.5px dashed var(--border);padding:12px 14px}
+.add-section-wrap p{font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:500}
+.add-sec-row{display:flex;gap:8px}
+.add-sec-inp{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:15px;color:var(--text);outline:none;font-family:inherit}
+.add-sec-inp:focus{border-color:var(--teal)}
+.add-sec-go{background:var(--navy);color:white;border:none;border-radius:8px;padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;flex-shrink:0;white-space:nowrap}
+
+/* EDIT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:white;border-radius:20px 20px 0 0;padding:20px 18px 36px;width:100%;max-width:540px}
+.modal h3{font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px}
+.modal label{font-size:13px;color:var(--muted);font-weight:600;display:block;margin-bottom:5px;margin-top:12px;text-transform:uppercase;letter-spacing:.4px}
+.modal input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:17px;color:var(--text);outline:none;font-family:inherit}
+.modal input:focus{border-color:var(--teal)}
+.modal-btns{display:flex;gap:10px;margin-top:18px}
+.modal-cancel{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:14px;font-size:16px;font-weight:600;color:var(--muted);cursor:pointer}
+.modal-save{flex:2;background:var(--teal);border:none;border-radius:10px;padding:14px;font-size:16px;font-weight:700;color:white;cursor:pointer}
+
+.empty{text-align:center;padding:32px 16px;color:var(--muted)}
+.empty .em{font-size:40px;margin-bottom:10px}
+.empty p{font-size:16px}
+
+.fab{position:fixed;bottom:22px;right:16px;width:50px;height:50px;background:var(--navy);color:white;border-radius:50%;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:200}
+
+.sec-alerts{background:linear-gradient(135deg,#880E4F,#AD1457);color:white}
+.sec-docs{background:linear-gradient(135deg,#1A2E4A,#2C4A6E);color:white}
+.sec-rv{background:linear-gradient(135deg,#BF360C,#D84315);color:white}
+.sec-camp{background:linear-gradient(135deg,#1B5E20,#2E7D32);color:white}
+.sec-kitchen{background:linear-gradient(135deg,#00695C,#00897B);color:white}
+.sec-outdoor{background:linear-gradient(135deg,#1565C0,#1976D2);color:white}
+.sec-clothing{background:linear-gradient(135deg,#4A148C,#6A1B9A);color:white}
+.sec-health{background:linear-gradient(135deg,#B71C1C,#C62828);color:white}
+.sec-tech{background:linear-gradient(135deg,#006064,#00838F);color:white}
+.sec-personal{background:linear-gradient(135deg,#37474F,#455A64);color:white}
+.sec-custom{background:linear-gradient(135deg,#F57F17,#F9A825);color:white}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🚐 Lista de Empaque</h1>
+      <p>Viaje RV Familiar · Junio 5–14, 2026</p>
+    </div>
+    <div class="hbtns">
+      <button class="hbtn" onclick="resetAll()">↺ Reiniciar</button>
+    </div>
+  </div>
+  <div class="pcnt">
+    <span class="pct" id="pct">0%</span>
+    <span id="cnt">0 de 0 completados</span>
+  </div>
+  <div class="pbg"><div class="pfill" id="pfill"></div></div>
+</div>
+
+<div class="filters">
+  <button class="fbtn active" onclick="setFilter('all',this)">📋 Todo</button>
+  <button class="fbtn" onclick="setFilter('pending',this)">⏳ Pendiente</button>
+  <button class="fbtn" onclick="setFilter('done',this)">✅ Listo</button>
+  <button class="fbtn" onclick="setFilter('critical',this)">🚨 Crítico</button>
+</div>
+
+<div id="sections-wrap"></div>
+
+<div class="add-section-wrap" id="add-sec-wrap">
+  <p>+ Agregar nueva categoría</p>
+  <div class="add-sec-row">
+    <input class="add-sec-inp" id="new-sec-name" placeholder="Nombre de la categoría" />
+    <button class="add-sec-go" onclick="addSection()">Agregar</button>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>✏️ Editar ítem</h3>
+    <label>Texto del ítem</label>
+    <input type="text" id="edit-text" placeholder="Descripción del ítem" />
+    <label>Nota (opcional)</label>
+    <input type="text" id="edit-note" placeholder="Nota o detalle adicional" />
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-save" onclick="saveEdit()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const COLORS = ['sec-alerts','sec-docs','sec-rv','sec-camp','sec-kitchen','sec-outdoor','sec-clothing','sec-health','sec-tech','sec-personal','sec-custom'];
+let editTarget = null;
+let currentFilter = 'all';
+
+const DEFAULT_DATA = [
+  { id:"alerts", icon:"🚨", title:"Alertas Críticas del Itinerario", cls:"sec-alerts", items:[
+    {id:"a1",text:"Mascarillas requeridas en WWII Museum (mayores de 8 años)",note:"",critical:true,isAlert:true},
+    {id:"a2",text:"Cajun Encounters: recogida 10:15am en Homewood Suites (317 N Rampart St, NOLA) — NO en el RV",note:"",critical:true,isAlert:true},
+    {id:"a3",text:"UTV Sevierville: llegar 30 min ANTES del tour de 3pm (890 Spurgeon Hollow Rd)",note:"",critical:true,isAlert:true},
+    {id:"a4",text:"NOC Pigeon River: llegar 30 min antes turno 11:20am — NO chanclas, llevar ropa seca",note:"",critical:true,isAlert:true},
+    {id:"a5",text:"Cades Cove: salir del campamento a las 5:30am — viernes Jun 12",note:"",critical:true,isAlert:true},
+    {id:"a6",text:"Clingmans Dome: solo auto Turo — el RV NO puede subir",note:"",critical:true,isAlert:true},
+    {id:"a7",text:"Alum Cave Trail: llegar al estacionamiento antes 7am — se llena a las 9am",note:"",critical:true,isAlert:true},
+    {id:"a8",text:"Tomar fotos del RV interior/exterior ANTES de salir de Parkland",note:"",critical:true,isAlert:true},
+    {id:"a9",text:"Emergencias RV — Coach-Net 24/7: 877-978-7222",note:"Guardar en TODOS los celulares",critical:true,isAlert:true},
+    {id:"a10",text:"Llenar tanque del RV en Gainesville — más barato que en el Panhandle",note:"",critical:true,isAlert:true},
+    {id:"a11",text:"Comprar Smokies Parking Tag en Sugarlands — primera parada al llegar",note:"",critical:true,isAlert:true},
+    {id:"a12",text:"Compras de 4 días en Townsend TN — mejor precio que Gatlinburg",note:"",critical:true,isAlert:true},
+  ]},
+  { id:"docs", icon:"📄", title:"Documentos y Reservaciones", cls:"sec-docs", items:[
+    {id:"d1",text:"Confirmación Topsail Hill SP",note:"Conf #22967722 · $116.46 pagado",critical:true},
+    {id:"d2",text:"Confirmación French Quarter RV Resort",note:"Jun 7–8 · 2 noches",critical:true},
+    {id:"d3",text:"Confirmación Raccoon Mountain",note:"Jun 9 · 1 noche",critical:true},
+    {id:"d4",text:"Confirmación Twin Creek RV Resort",note:"Jun 10–13 · 4 noches",critical:true},
+    {id:"d5",text:"Contrato RV Outdoorsy + Care Plan Coach-Net",note:"",critical:true},
+    {id:"d6",text:"4 boletos WWII Museum",note:"Jun 7 · 9am · Order #20260531-12615531",critical:true},
+    {id:"d7",text:"Confirmación Cajun Encounters",note:"Lunes Jun 8 · 10:15am en Homewood Suites",critical:true},
+    {id:"d8",text:"Confirmación UTV Sevierville",note:"Vie Jun 12 · 3pm · 890 Spurgeon Hollow Rd",critical:true},
+    {id:"d9",text:"Confirmación NOC Pigeon River",note:"Sáb Jun 13 · 11:20am · llegar 30 min antes",critical:true},
+    {id:"d10",text:"Confirmación auto Turo (Kia Sportage)",note:"Entrega en campamento Jun 10",critical:true},
+    {id:"d11",text:"Licencias de conducir (los 4)",note:"",critical:true},
+    {id:"d12",text:"Seguro de salud / tarjetas médicas (los 4)",note:"",critical:true},
+    {id:"d13",text:"Reservación Dooky Chase confirmada por teléfono",note:"No solo OpenTable",critical:true},
+    {id:"d14",text:"Licencia de pesca Tennessee",note:"tn.gov/twra · ~$11 por 3 días",critical:false},
+  ]},
+  { id:"rv_ops", icon:"🔧", title:"Operación del RV", cls:"sec-rv", items:[
+    {id:"rv1",text:"Grabar walkthrough del dueño al recoger el RV",note:"Altura, combustible, tanques, slideouts, awning, AC, propano",critical:true},
+    {id:"rv2",text:"Manguera de aguas negras (sewer hose) + conector",note:"",critical:true},
+    {id:"rv3",text:"Regulador de presión de agua",note:"",critical:true},
+    {id:"rv4",text:"Bloques niveladores x4 (leveling blocks)",note:"",critical:true},
+    {id:"rv5",text:"Cuñas para ruedas (wheel chocks x2)",note:"",critical:true},
+    {id:"rv6",text:"Extensión eléctrica 30 amp",note:"",critical:true},
+    {id:"rv7",text:"Guantes de goma para tanques",note:"",critical:true},
+    {id:"rv8",text:"Papel higiénico especial para RV",note:"NO el papel de casa — tapona el sistema",critical:true},
+    {id:"rv9",text:"Tratamiento para tanque negro (tank treatment tabs)",note:"",critical:true},
+    {id:"rv10",text:"Tapete exterior de campamento",note:"",critical:false},
+    {id:"rv11",text:"Linterna / headlamp + pilas extra",note:"",critical:true},
+    {id:"rv12",text:"Cinta duct tape + destornilladores básicos",note:"",critical:false},
+  ]},
+  { id:"camp", icon:"🏕️", title:"Campamento y Exterior", cls:"sec-camp", items:[
+    {id:"c1",text:"Sillas de campamento x4",note:"",critical:true},
+    {id:"c2",text:"Mesa plegable exterior",note:"",critical:false},
+    {id:"c3",text:"Luces de ambiente (string lights)",note:"",critical:false},
+    {id:"c4",text:"Parrilla portátil / grill + carbón + encendedor",note:"",critical:true},
+    {id:"c5",text:"Pinzas para asado + espátula",note:"",critical:true},
+    {id:"c6",text:"Bolsas de basura grandes x20",note:"",critical:true},
+    {id:"c7",text:"Spray repelente de insectos DEET x4",note:"",critical:true},
+    {id:"c8",text:"Bear spray (spray anti-oso)",note:"Comprar en Sugarlands Visitor Center al llegar",critical:true},
+    {id:"c9",text:"Lámpara de campamento con batería",note:"",critical:true},
+    {id:"c10",text:"Palitos para marshmallows / s'mores kit",note:"",critical:false},
+  ]},
+  { id:"kitchen", icon:"🍳", title:"Cocina y Comida", cls:"sec-kitchen", items:[
+    {id:"k1",text:"Hielera grande (60qt+) con tapa hermética",note:"",critical:true},
+    {id:"k2",text:"Hielera pequeña para el auto del día",note:"",critical:true},
+    {id:"k3",text:"Hielo en bloque — comprar en Townsend TN",note:"Dura 3x más que hielo picado",critical:true},
+    {id:"k4",text:"Cafetera / French press + café molido",note:"",critical:true},
+    {id:"k5",text:"Ollas + sartén antiadherente",note:"",critical:true},
+    {id:"k6",text:"Cuchillos + tabla de cortar + utensilios",note:"",critical:true},
+    {id:"k7",text:"Platos, vasos y cubiertos x4",note:"",critical:true},
+    {id:"k8",text:"Papel aluminio + bolsas Ziploc surtidas",note:"",critical:true},
+    {id:"k9",text:"Abridor de latas + sacacorchos",note:"",critical:true},
+    {id:"k10",text:"Sal, pimienta, aceite, condimentos básicos",note:"",critical:true},
+    {id:"k11",text:"Snacks: nueces, barras, frutas secas, chips",note:"",critical:true},
+    {id:"k12",text:"Bebidas: agua, refrescos, cerveza",note:"Comprar en Gainesville o Fort Walton",critical:true},
+    {id:"k13",text:"Desayunos: huevos, pan, mantequilla, avena",note:"",critical:true},
+    {id:"k14",text:"Proteínas para asado: hamburguesas, salchichas, pollo",note:"",critical:true},
+    {id:"k15",text:"Papel toalla + jabón lavaplatos + esponja",note:"",critical:true},
+    {id:"k16",text:"Bolsas para almuerzos de sendero (x4 días)",note:"",critical:true},
+  ]},
+  { id:"outdoor", icon:"⛰️", title:"Aventura y Naturaleza", cls:"sec-outdoor", items:[
+    {id:"o1",text:"Mochilas de senderismo livianas (daypack x4)",note:"",critical:true},
+    {id:"o2",text:"Botas o zapatos de senderismo impermeables",note:"",critical:true},
+    {id:"o3",text:"Sandalias de agua para rafting y kayak",note:"NO chanclas en el rafting NOC",critical:true},
+    {id:"o4",text:"Binoculares",note:"ESENCIAL para Cades Cove — osos, venados, pavos",critical:true},
+    {id:"o5",text:"Gafas de sol polarizadas x4",note:"Crítico para pesca y días en el agua",critical:true},
+    {id:"o6",text:"Bolsa seca / dry bag para teléfonos en rafting",note:"",critical:true},
+    {id:"o7",text:"GoPro / cámara acuática + soporte",note:"",critical:false},
+    {id:"o8",text:"Cañas de pescar ultraligeras 5–6ft x4",note:"",critical:false},
+    {id:"o9",text:"Señuelos: Panther Martin, Rooster Tail, Mepps",note:"Solo artificiales dentro del parque GSMNP",critical:false},
+    {id:"o10",text:"Red de pesca (rubber mesh) + fórceps",note:"",critical:false},
+  ]},
+  { id:"clothing", icon:"👕", title:"Ropa por Persona · 10 días", cls:"sec-clothing", items:[
+    {id:"cl1",text:"Trajes de baño x2–3",note:"Topsail Hill, kayak, rafting",critical:true},
+    {id:"cl2",text:"Shorts de secado rápido x4",note:"",critical:true},
+    {id:"cl3",text:"Camisetas x6",note:"",critical:true},
+    {id:"cl4",text:"Una camisa presentable",note:"Para Dooky Chase y restaurantes",critical:true},
+    {id:"cl5",text:"Impermeable / rain jacket x1",note:"Montañas + NOLA — obligatorio",critical:true},
+    {id:"cl6",text:"Polar o sudadera ligera x1",note:"Noches Smokies y Clingmans Dome (baja a 10°C)",critical:true},
+    {id:"cl7",text:"Pantalón largo x2",note:"Cades Cove, UTV, noches frías",critical:true},
+    {id:"cl8",text:"Ropa interior x10",note:"",critical:true},
+    {id:"cl9",text:"Calcetines x10 pares (incluir 2 pares de lana)",note:"",critical:true},
+    {id:"cl10",text:"Flip flops / sandalias x1 par",note:"",critical:true},
+    {id:"cl11",text:"Gorra o sombrero de sol x1",note:"",critical:true},
+    {id:"cl12",text:"Ropa seca de cambio en bolsa Ziploc para rafting",note:"",critical:true},
+  ]},
+  { id:"health", icon:"💊", title:"Salud y Primeros Auxilios", cls:"sec-health", items:[
+    {id:"h1",text:"Botiquín de primeros auxilios completo",note:"Vendas, antiséptico, tijeras, cinta médica",critical:true},
+    {id:"h2",text:"Ibuprofeno + acetaminofén x4 personas",note:"",critical:true},
+    {id:"h3",text:"Antidiarreicos + antiácidos (Pepto, Tums)",note:"",critical:true},
+    {id:"h4",text:"Antihistamínico (Benadryl)",note:"Reacciones a insectos",critical:true},
+    {id:"h5",text:"Crema de hidrocortisona (picaduras)",note:"",critical:true},
+    {id:"h6",text:"Protector solar SPF 50+ botella grande x4",note:"",critical:true},
+    {id:"h7",text:"After-sun / aloe vera",note:"",critical:false},
+    {id:"h8",text:"Medicamentos recetados x4 personas (x14 días)",note:"",critical:true},
+    {id:"h9",text:"Mascarillas x8",note:"Requeridas en WWII Museum para mayores de 8 años",critical:true},
+    {id:"h10",text:"Pinzas para garrapatas + termómetro",note:"Garrapatas frecuentes en las Smokies en junio",critical:true},
+  ]},
+  { id:"tech", icon:"📱", title:"Tecnología y Navegación", cls:"sec-tech", items:[
+    {id:"t1",text:"Cargadores de celular x4 + cables",note:"",critical:true},
+    {id:"t2",text:"Power bank grande (20,000 mAh+)",note:"Para días de senderismo sin electricidad",critical:true},
+    {id:"t3",text:"Mapas offline descargados en el celular",note:"Google Maps — zonas sin señal en Smokies",critical:true},
+    {id:"t4",text:"Spotify / Netflix descargados offline",note:"Sin señal en las Smokies",critical:true},
+    {id:"t5",text:"Parlante Bluetooth resistente al agua",note:"",critical:false},
+    {id:"t6",text:"Mapa impreso GSMNP",note:"Pedir en Sugarlands Visitor Center al llegar",critical:true},
+    {id:"t7",text:"Cámara + baterías extras + tarjeta SD",note:"",critical:false},
+  ]},
+  { id:"personal", icon:"🧴", title:"Personal e Higiene", cls:"sec-personal", items:[
+    {id:"p1",text:"Artículos de tocador x4 personas",note:"Champú, jabón, pasta dental, desodorante",critical:true},
+    {id:"p2",text:"Toallas x2 por persona",note:"Una de playa, una de baño",critical:true},
+    {id:"p3",text:"Toallas húmedas / baby wipes",note:"Muy útiles en el RV",critical:true},
+    {id:"p4",text:"Gel desinfectante de manos x4",note:"",critical:true},
+    {id:"p5",text:"Confirmar si el RV incluye almohadas y sábanas",note:"Si no, traer las propias",critical:true},
+  ]},
+];
+
+// STATE
+let data = [];
+let checked = {};
+
+function genId() { return 'x' + Math.random().toString(36).substr(2,9); }
+
+function saveAll() {
+  try {
+    localStorage.setItem('rv26_data', JSON.stringify(data));
+    localStorage.setItem('rv26_chk', JSON.stringify(checked));
+  } catch(e) {}
+}
+
+function loadAll() {
+  try {
+    const d = localStorage.getItem('rv26_data');
+    const c = localStorage.getItem('rv26_chk');
+    if (d) data = JSON.parse(d);
+    else data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    if (c) checked = JSON.parse(c);
+  } catch(e) {
+    data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+}
+
+function resetAll() {
+  if (!confirm('¿Reiniciar toda la lista?\nSe borrarán todos los checks pero se mantendrán tus ítems personalizados.')) return;
+  checked = {};
+  saveAll();
+  render();
+}
+
+// TOGGLE CHECK
+function toggle(id) {
+  checked[id] = !checked[id];
+  saveAll();
+  updateItem(id);
+  updateStats();
+  if (currentFilter !== 'all') render();
+}
+
+function updateItem(id) {
+  const el = document.getElementById('itm-' + id);
+  if (!el) return;
+  const item = findItem(id);
+  if (!item) return;
+  const isChecked = !!checked[id];
+  if (isChecked) el.classList.add('checked'); else el.classList.remove('checked');
+}
+
+function findItem(id) {
+  for (const sec of data) {
+    const it = sec.items.find(i => i.id === id);
+    if (it) return it;
+  }
+  return null;
+}
+
+function findSection(secId) { return data.find(s => s.id === secId); }
+
+// ADD ITEM
+function addItem(secId) {
+  const inp = document.getElementById('add-inp-' + secId);
+  const val = inp.value.trim();
+  if (!val) return;
+  const sec = findSection(secId);
+  if (!sec) return;
+  const newItem = { id: genId(), text: val, note: '', critical: false, isAlert: false };
+  sec.items.push(newItem);
+  inp.value = '';
+  saveAll();
+  render();
+}
+
+function addItemKey(e, secId) { if (e.key === 'Enter') addItem(secId); }
+
+// DELETE ITEM
+function deleteItem(secId, itemId) {
+  const sec = findSection(secId);
+  if (!sec) return;
+  sec.items = sec.items.filter(i => i.id !== itemId);
+  delete checked[itemId];
+  saveAll();
+  render();
+}
+
+// EDIT ITEM
+function openEdit(secId, itemId) {
+  const item = findItem(itemId);
+  if (!item) return;
+  editTarget = { secId, itemId };
+  document.getElementById('edit-text').value = item.text;
+  document.getElementById('edit-note').value = item.note || '';
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => document.getElementById('edit-text').focus(), 50);
+}
+
+function saveEdit() {
+  if (!editTarget) return;
+  const item = findItem(editTarget.itemId);
+  if (!item) return;
+  const t = document.getElementById('edit-text').value.trim();
+  const n = document.getElementById('edit-note').value.trim();
+  if (!t) return;
+  item.text = t;
+  item.note = n;
+  editTarget = null;
+  saveAll();
+  closeModal();
+  render();
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal')) return;
+  document.getElementById('modal').classList.remove('open');
+  editTarget = null;
+}
+
+// ADD SECTION
+function addSection() {
+  const inp = document.getElementById('new-sec-name');
+  const val = inp.value.trim();
+  if (!val) return;
+  const colorIdx = data.length % COLORS.length;
+  const icons = ['📦','🎒','🗂️','⭐','🏃','🎯','🌟','💼'];
+  const icon = icons[data.length % icons.length];
+  data.push({ id: genId(), icon, title: val, cls: COLORS[colorIdx] || 'sec-custom', items: [] });
+  inp.value = '';
+  saveAll();
+  render();
+}
+
+function addSectionKey(e) { if (e.key === 'Enter') addSection(); }
+
+// DELETE SECTION
+function deleteSection(secId) {
+  if (!confirm('¿Eliminar esta categoría y todos sus ítems?')) return;
+  data = data.filter(s => s.id !== secId);
+  saveAll();
+  render();
+}
+
+// FILTER
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function getFiltered(items) {
+  if (currentFilter === 'all') return items;
+  if (currentFilter === 'done') return items.filter(i => checked[i.id]);
+  if (currentFilter === 'pending') return items.filter(i => !checked[i.id]);
+  if (currentFilter === 'critical') return items.filter(i => i.critical && !checked[i.id]);
+  return items;
+}
+
+// STATS
+function updateStats() {
+  const all = data.flatMap(s => s.items);
+  const total = all.length;
+  const done = all.filter(i => checked[i.id]).length;
+  const pct = total > 0 ? Math.round(done / total * 100) : 0;
+  document.getElementById('pct').textContent = pct + '%';
+  document.getElementById('cnt').textContent = done + ' de ' + total + ' completados';
+  document.getElementById('pfill').style.width = pct + '%';
+}
+
+// RENDER
+function toggleSection(id) {
+  const el = document.getElementById('sec-' + id);
+  if (el) el.classList.toggle('collapsed');
+}
+
+function render() {
+  const wrap = document.getElementById('sections-wrap');
+  wrap.innerHTML = '';
+  let anyVisible = false;
+
+  data.forEach(sec => {
+    const filtered = getFiltered(sec.items);
+    if (filtered.length === 0 && currentFilter !== 'all') return;
+    anyVisible = true;
+
+    const doneC = sec.items.filter(i => checked[i.id]).length;
+    const div = document.createElement('div');
+    div.className = 'sections';
+    div.innerHTML = buildSection(sec, filtered, doneC);
+    wrap.appendChild(div);
+  });
+
+  if (!anyVisible) {
+    wrap.innerHTML = '<div class="sections"><div class="empty"><div class="em">🎉</div><p>¡Todo listo en esta categoría!</p></div></div>';
+  }
+
+  // Add section wrap placement
+  const addWrap = document.getElementById('add-sec-wrap');
+  if (addWrap && currentFilter === 'all') {
+    addWrap.style.display = 'block';
+  } else if (addWrap) {
+    addWrap.style.display = 'none';
+  }
+
+  updateStats();
+}
+
+function buildSection(sec, filtered, doneC) {
+  const itemsHtml = filtered.map(item => buildItem(sec.id, item)).join('');
+  const addRow = currentFilter === 'all' ? `
+    <div class="add-row">
+      <input class="add-inp" id="add-inp-${sec.id}" placeholder="Agregar ítem..." onkeydown="addItemKey(event,'${sec.id}')" />
+      <button class="add-go" onclick="addItem('${sec.id}')">+</button>
+    </div>` : '';
+
+  return `
+    <div class="section" id="sec-${sec.id}">
+      <div class="sec-hdr ${sec.cls}" onclick="toggleSection('${sec.id}')">
+        <span class="sec-icon">${sec.icon}</span>
+        <span class="sec-title">${sec.title}</span>
+        <span class="sec-badge">${doneC}/${sec.items.length}</span>
+        <span class="sec-chev">▾</span>
+      </div>
+      <div class="sec-items">
+        ${itemsHtml}
+        ${addRow}
+      </div>
+    </div>`;
+}
+
+function buildItem(secId, item) {
+  const isChk = !!checked[item.id];
+  const alertCls = item.isAlert ? ' alert-item' : '';
+  const chkCls = isChk ? ' checked' : '';
+  return `
+    <div class="item${chkCls}${alertCls}" id="itm-${item.id}">
+      <div class="chkbox" onclick="toggle('${item.id}')"><span class="chk-ico">✓</span></div>
+      <div class="item-body" onclick="toggle('${item.id}')">
+        <div class="item-text">${item.text}</div>
+        ${item.note ? `<div class="item-note">${item.note}</div>` : ''}
+        ${item.critical && !isChk ? `<span class="crit-badge">Crítico</span>` : ''}
+      </div>
+      <div class="item-actions">
+        <button class="act-btn edit-btn" onclick="openEdit('${secId}','${item.id}')" title="Editar">✏️</button>
+        <button class="act-btn del-btn" onclick="deleteItem('${secId}','${item.id}')" title="Eliminar">🗑️</button>
+      </div>
+    </div>`;
+}
+
+// Edit modal keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('modal').classList.contains('open')) saveEdit();
+});
+
+loadAll();
+render();
+</script>
+</body>
+</html>
