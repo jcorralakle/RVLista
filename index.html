@@ -391,7 +391,7 @@ function initFirebase(url){
         data = val.data;
         checked = val.checked || {};
         setSyncBar('● En vivo — última actualización: '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),'ok');
-      } else {
+      } else { // never shown
         // First time: push defaults
         data = JSON.parse(JSON.stringify(DEFAULTS));
         checked = {};
@@ -430,7 +430,7 @@ function showMainList(){
   document.getElementById('progress-row').style.display='flex';
   document.getElementById('progress-bar-wrap').style.display='block';
   document.getElementById('reset-btn').style.display='block';
-  document.getElementById('settings-btn').style.display='block';
+  document.getElementById('settings-btn').style.display='none';
   render();
 }
 
@@ -515,7 +515,7 @@ function saveModal(){
   if(modalMode==='edit'){
     const item=findItem(modalCtx.itemId);
     if(item){item.text=t;item.note=n;item.critical=critOn;}
-  } else {
+  } else { // never shown
     const s=findSec(modalCtx.secId);
     if(s) s.items.push({id:uid(),text:t,note:n,critical:critOn});
   }
@@ -636,11 +636,12 @@ function buildItem(secId,item){
 }
 
 // ─── INIT ─────────────────────────────────────────────────────
-const savedUrl = localStorage.getItem('rv26_dburl');
-if(savedUrl){
+const savedUrl = "https://rvlista-b7a7e-default-rtdb.firebaseio.com";
+// URL hardcoded, always connect
+if(true){
   document.getElementById('setup-screen').style.display='none';
   initFirebase(savedUrl);
-} else {
+} else { // never shown
   showSetup();
 }
 </script>
