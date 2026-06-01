@@ -165,29 +165,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   <button class="fbtn" onclick="setFilter('critical',this)">🚨 Crítico</button>
 </div>
 
-<!-- SETUP SCREEN -->
-<div id="setup-screen" class="setup-screen">
-  <div class="setup-card">
-    <h2>🔧 Configurar base de datos</h2>
-    <p>Para que toda la familia comparta la misma lista en tiempo real, necesitas conectar Firebase — la base de datos gratuita de Google. Solo se hace una vez.</p>
-
-    <div class="setup-step"><div class="step-num">1</div><div>Ve a <a class="setup-link" href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> e inicia sesión con tu cuenta Google.</div></div>
-    <div class="setup-step"><div class="step-num">2</div><div>Haz clic en <strong>"Crear proyecto"</strong> → ponle cualquier nombre (ej. <em>rv-lista-2026</em>) → continuar sin Analytics → crear.</div></div>
-    <div class="setup-step"><div class="step-num">3</div><div>En el menú izquierdo ve a <strong>Compilación → Realtime Database</strong> → "Crear base de datos" → elige cualquier ubicación → selecciona <strong>"Empezar en modo de prueba"</strong> → Listo.</div></div>
-    <div class="setup-step"><div class="step-num">4</div><div>En el menú izquierdo ve a <strong>Configuración del proyecto ⚙️</strong> (arriba) → pestaña <strong>"Tus apps"</strong> → haz clic en el icono <strong>&lt;/&gt;</strong> (Web) → registra la app con cualquier nombre → copia el valor de <strong>databaseURL</strong> que aparece en el código (es algo como <em>https://rv-lista-2026-default-rtdb.firebaseio.com</em>).</div></div>
-
-    <label class="m-label" style="margin-top:16px">Pega aquí tu databaseURL de Firebase</label>
-    <input class="setup-inp" id="db-url-inp" placeholder="https://tu-proyecto-default-rtdb.firebaseio.com" type="url" />
-    <div class="setup-note">⚠️ Solo el databaseURL — no copies todo el código, solo esa línea. Empieza con <strong>https://</strong> y termina con <strong>.firebaseio.com</strong></div>
-    <button class="setup-btn" onclick="connectFirebase()">Conectar y cargar lista ▶</button>
-  </div>
-
-  <div class="setup-card" style="border-color:#A5D6A7">
-    <h2 style="color:var(--green)">✅ ¿Ya configuraste Firebase antes?</h2>
-    <p>Si ya tienes el databaseURL guardado de antes, pégalo arriba y haz clic en Conectar. La lista se sincroniza al instante.</p>
-  </div>
-</div>
-
 <!-- MAIN LIST -->
 <div id="main-wrap" style="display:none"></div>
 
@@ -236,7 +213,7 @@ const DEFAULTS = [
     {id:"d14",text:"Licencia de pesca Tennessee",note:"tn.gov/twra · ~$11 por 3 días",critical:false},
     {id:"d15",text:"Comprar Smokies Parking Tag",note:"Disponible en Sugarlands Visitor Center o recreation.gov",critical:true},
   ]},
-  { id:"camp"{ id:"camp", icon:"🏕️", title:"Campamento y Exterior", cls:"c-camp", items:[
+  { id:"camp", icon:"🏕️", title:"Campamento y Exterior", cls:"c-camp", items:[
     {id:"c1",text:"Sillas de campamento x4",note:"",critical:true},
     {id:"c2",text:"Mesa plegable exterior",note:"",critical:false},
     {id:"c3",text:"Luces de ambiente (string lights)",note:"",critical:false},
@@ -340,7 +317,7 @@ function setSyncBar(msg, cls){
 
 // ─── FIREBASE SETUP ───────────────────────────────────────────
 function connectFirebase(){
-  const url = document.getElementById('db-url-inp').value.trim();
+  const url = document.getElementById('db-url-inp').value.trim().replace(/\/+$/, '');
   if(!url || !url.startsWith('https://') || !url.includes('firebaseio.com')){
     alert('Por favor ingresa un databaseURL válido.\nDebe empezar con https:// y terminar con .firebaseio.com');
     return;
@@ -362,6 +339,7 @@ function showSetup(){
 }
 
 function initFirebase(url){
+  url = url.replace(/\/+$/, '');
   setSyncBar('⟳ Conectando...','syncing');
   try{
     // Init or reuse app
@@ -379,13 +357,15 @@ function initFirebase(url){
       if(val && val.data && val.checked !== undefined){
         data = val.data;
         checked = val.checked || {};
-        setSyncBar('● En vivo — última actualización: '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),'ok');
-      } else { // never shown
-        // First time: push defaults
+        openSections = val.openSections || {};
+        setSyncBar('● En vivo — '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),'ok');
+      } else {
+        // First time or deleted: push defaults
         data = JSON.parse(JSON.stringify(DEFAULTS));
         checked = {};
+        openSections = {};
         pushToFirebase();
-        setSyncBar('✓ Lista creada en Firebase','ok');
+        setSyncBar('✓ Lista creada','ok');
       }
       showMainList();
     }, err => {
@@ -413,7 +393,8 @@ function scheduleSave(){
 }
 
 function showMainList(){
-  document.getElementById('setup-screen').style.display='none';
+  const ss = document.getElementById('setup-screen');
+  if(ss) ss.style.display='none';
   document.getElementById('main-wrap').style.display='block';
   document.getElementById('filter-row').style.display='flex';
   document.getElementById('progress-row').style.display='flex';
